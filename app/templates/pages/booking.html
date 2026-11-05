@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ t('预订门票') }} · {{ attr_field(attraction, 'name') }}{% endblock %}
+{% block body_page %}booking{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">BOOKING</p>
+    <h1 class="page-title">{{ t('预订门票') }}</h1>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container booking-grid"
+       data-booking
+       data-attraction-id="{{ attraction.id }}"
+       data-price="{{ attraction.price or 0 }}">
+    <div class="booking-info">
+      <img src="{{ attraction.card_image }}" alt="{{ attr_field(attraction, 'name') }}">
+      <div class="booking-info-body">
+        <p class="eyebrow">{{ category_label(attraction.category) }} · {{ city_label(attraction.city) }}</p>
+        <h2 class="booking-name">{{ attr_field(attraction, 'name') }}</h2>
+        <p class="booking-price">{{ t('门票') }} {{ price_text(attraction) }}{% if attr_field(attraction, 'ticket_note') %} · {{ attr_field(attraction, 'ticket_note') }}{% endif %}</p>
+        <a class="text-sm text-teal" href="/attractions/{{ attraction.slug }}">{{ t('查看景点详情 →') }}</a>
+      </div>
+    </div>
+
+    <form class="booking-form" data-form novalidate>
+      <label class="field">
+        <span>{{ t('游玩日期') }}</span>
+        <input class="input" type="date" name="visit_date" data-date required>
+      </label>
+      <label class="field">
+        <span>{{ t('人数（1–10）') }}</span>
+        <input class="input" type="number" name="quantity" data-qty min="1" max="10" value="1" required>
+      </label>
+      <p class="booking-total">{{ t('合计') }} <strong data-total>{{ price_text(attraction) }}</strong></p>
+      <button class="btn btn-primary" type="submit" data-submit>{{ t('提交预订') }}</button>
+      <p class="itin-msg" data-msg role="status"></p>
+    </form>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/booking.js') }}" defer></script>
+{% endblock %}

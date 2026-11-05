@@ -1,0 +1,233 @@
+/* 站内 AI 助手：页面上下文快捷指令专用样式。
+ *
+ * 独立文件，不并入 input.css / app.css（那两个由别的任务重建）。
+ * 只补三类东西：
+ *   1. 后台页隐藏建议区
+ *   2. 「查冲突 / 算预算」这类直连接口的按钮（带 ⚡ 标记）
+ *   3. 直连接口结果在面板里的紧凑排版
+ */
+
+.ai-suggestions[hidden],
+.ai-suggest-label[hidden] {
+  display: none !important;
+}
+
+/* 直连本地接口的按钮：和普通「填进输入框」的指令区分开 */
+.ai-suggestions button.is-direct {
+  border-color: rgba(77, 107, 254, 0.35);
+  background: rgba(77, 107, 254, 0.08);
+  color: #3b55d9;
+  font-weight: 600;
+}
+
+.ai-suggestions button.is-direct::before {
+  content: "⚡";
+  margin-right: 4px;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.ai-suggestions button.is-direct:hover {
+  border-color: #4d6bfe;
+  background: rgba(77, 107, 254, 0.15);
+  color: #2439a8;
+}
+
+/* 接口结果消息块 */
+.ai-shortcut-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ai-sc-row {
+  margin: 0;
+  color: #374151;
+  font-size: 12px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.ai-sc-row.ai-sc-title {
+  color: #111827;
+  font-weight: 600;
+}
+
+.ai-sc-row.is-high::before,
+.ai-sc-row.is-medium::before,
+.ai-sc-row.is-low::before {
+  content: "●";
+  margin-right: 4px;
+  font-size: 8px;
+  vertical-align: 1.5px;
+}
+
+.ai-sc-row.is-high::before {
+  color: #dc2626;
+}
+
+.ai-sc-row.is-medium::before {
+  color: #d97706;
+}
+
+.ai-sc-row.is-low::before {
+  color: #6b7280;
+}
+
+.ai-sc-note {
+  margin: 3px 0 0;
+  color: #9aa1ad;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.ai-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-style: normal;
+}
+
+.ai-progress-step {
+  color: #8a9592;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ai-progress-step::before {
+  content: "○";
+  display: inline-block;
+  width: 18px;
+}
+
+.ai-progress-step.is-active { color: #1f4e5a; font-weight: 600; }
+.ai-progress-step.is-active::before { content: "●"; }
+.ai-progress-step.is-done { color: #547568; }
+.ai-progress-step.is-done::before { content: "✓"; }
+
+.ai-failure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-self: flex-start;
+}
+
+.ai-failure-action {
+  border: 1px solid rgba(31, 78, 90, .3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: #fff;
+  color: #1f4e5a;
+  font-size: 12px;
+}
+
+.ai-failure-action:hover { background: rgba(31, 78, 90, .08); }
+.ai-failure-action:disabled { opacity: .5; cursor: default; }
+
+/* ===== 面板可缩放：首次提示 ===== */
+.ai-edge.is-hinting {
+  background: rgba(77, 107, 254, 0.14) !important;
+  box-shadow: inset 0 0 0 1px rgba(77, 107, 254, 0.55);
+  animation: ai-edge-hint 1.6s ease-in-out infinite;
+}
+
+@keyframes ai-edge-hint {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+.ai-resize-tip {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(31, 78, 90, 0.9);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(14, 42, 36, 0.25);
+}
+
+/* ===== 引导气泡：右侧「今天不再提示」 ===== */
+.ai-guide-actions {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 6px;
+}
+
+.ai-guide-snooze {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #8b93a3;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ai-guide-snooze:hover {
+  color: #4b5563;
+}
+
+/* ===== AI 小球拖拽 ===== */
+.ai-widget .ai-btn {
+  cursor: grab;
+  touch-action: none;
+}
+
+.ai-widget.is-dragging {
+  transition: none !important;
+}
+
+.ai-widget.is-dragging .ai-btn {
+  cursor: grabbing;
+  transform: scale(1.04);
+}
+
+/* ===== 拖球到景点卡片上：可投放高亮 ===== */
+.attr-card.is-drop-target,
+.daily-card.is-drop-target,
+.season-card.is-drop-target {
+  transform: translateY(-6px) scale(1.015) !important;
+  outline: 2px solid rgba(77, 107, 254, 0.85) !important;
+  outline-offset: 4px;
+  box-shadow: 0 18px 40px rgba(20, 40, 80, 0.28) !important;
+  z-index: 2;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.attr-card.is-drop-target::after,
+.daily-card.is-drop-target::after,
+.season-card.is-drop-target::after {
+  content: "松手问它";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #4d6bfe;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 16px rgba(20, 40, 80, 0.3);
+  pointer-events: none;
+}
+
+html[lang="en"] .attr-card.is-drop-target::after,
+html[lang="en"] .daily-card.is-drop-target::after,
+html[lang="en"] .season-card.is-drop-target::after {
+  content: "Drop to ask";
+}

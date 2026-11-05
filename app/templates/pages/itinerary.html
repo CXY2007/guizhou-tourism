@@ -1,0 +1,100 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ t('行程规划') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}itinerary{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">ITINERARY</p>
+    <h1 class="page-title">{{ t('行程规划') }}</h1>
+    <p class="page-sub">{{ t('填写出发点、是否住宿、天数、出发时间与预算，勾选想去的地方，AI 会给出出行方式、途经、天气、穿衣、住宿与逐日安排。') }}</p>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container itin" data-itinerary data-logged-in="{{ '1' if current_user.is_authenticated else '0' }}">
+    <div class="itin-picker">
+      {% for a in attractions %}
+      <label class="itin-card">
+        <input type="checkbox" class="itin-check" value="{{ a.id }}">
+        <img src="{{ a.card_image }}" alt="{{ attr_field(a, 'name') }}" loading="lazy">
+        <span class="itin-card-body">
+          <span class="itin-card-name">{{ attr_field(a, 'name') }}</span>
+          <span class="itin-card-meta">{{ city_label(a.city) }} · ★ {{ a.rating_label }}</span>
+        </span>
+      </label>
+      {% else %}
+      <p class="pane-empty">{{ t('暂无可选景点') }}</p>
+      {% endfor %}
+    </div>
+
+    <div class="itin-controls">
+      <label class="field itin-origin">
+        <span>{{ t('出发点') }}</span>
+        <input class="input" type="text" maxlength="40" placeholder="{{ t('如：贵阳龙洞堡机场 / 成都东站') }}" data-origin>
+      </label>
+      <label class="field itin-stay">
+        <span>{{ t('需要安排住宿') }}</span>
+        <select class="input" data-stay>
+          <option value="1">{{ t('需要') }}</option>
+          <option value="0">{{ t('不需要，当日往返') }}</option>
+        </select>
+      </label>
+      <label class="field itin-days">
+        <span>{{ t('游玩天数') }}</span>
+        <select class="input" data-days>
+          {% for d in range(1, 6) %}<option value="{{ d }}">{% if current_lang() == 'en' %}{{ d }} {{ 'day' if d == 1 else 'days' }}{% else %}{{ d }} {{ t('天') }}{% endif %}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field itin-date">
+        <span>{{ t('出发时间') }}</span>
+        <input class="input" type="date" data-start-date>
+      </label>
+      <label class="field itin-people">
+        <span>{{ t('出行人数') }}</span>
+        <select class="input" data-people>
+          {% for n in range(1, 7) %}<option value="{{ n }}"{% if n == 2 %} selected{% endif %}>{% if current_lang() == 'en' %}{{ n }} {{ 'person' if n == 1 else 'people' }}{% else %}{{ n }} {{ t('人') }}{% endif %}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field itin-budget">
+        <span>{{ t('人均预算（元）') }}</span>
+        <input class="input" type="number" min="0" max="200000" step="100" placeholder="2000" data-budget>
+      </label>
+      <button class="btn btn-primary" type="button" data-generate>{{ t('生成 AI 行程') }}</button>
+      <span class="itin-selected" data-selected-count>{{ t('已选 0 个') }}</span>
+    </div>
+    <p class="itin-msg" data-itin-msg role="status"></p>
+    {# 生成失败的备选入口：由 JS 按需填充，无内容时整块隐藏 #}
+    <div class="itin-retry" data-retry hidden></div>
+
+    {# 选择阶段预检：勾选 ≥1 时防抖预检，这里只放一条紧凑提示；无冲突/失败/勾选不足整块隐藏，绝不影响生成 #}
+    <div class="itin-precheck" data-precheck hidden></div>
+
+    <div class="itin-brief" data-brief hidden></div>
+    <p class="itin-lodging-loading" data-hotels-loading hidden>{{ t('酒店信息正在生成') }}</p>
+    <div class="itin-lodging" data-hotels hidden></div>
+
+    {# 冲突提示：逐条插进对应日期卡片；匹配不到日期的落在这里 #}
+    <div class="itin-conflicts" data-conflicts hidden></div>
+    {# 预算沙盘：接口失败时整块隐藏，不影响行程本体 #}
+    <div class="itin-budget-slot" data-budget hidden></div>
+
+    <p class="itin-summary" data-summary hidden></p>
+    <div class="itin-result" data-result hidden></div>
+    <ul class="itin-notes" data-notes hidden></ul>
+
+    <div class="itin-save" data-save-box hidden>
+      {% if current_user.is_authenticated %}
+      <input class="input" type="text" maxlength="60" placeholder="{{ t('行程标题，如：黔东南三日游') }}" data-title>
+      <button class="btn btn-outline" type="button" data-save>{{ t('保存行程') }}</button>
+      <p class="itin-msg" data-save-msg role="status" hidden></p>
+      {% else %}
+      <p class="itin-msg">{{ t('登录后可保存') }} · <a class="text-teal" href="{{ url_for('auth.login') }}?next=/itinerary">{{ t('去登录') }}</a></p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/itinerary.js') }}?v=20261105c" defer></script>
+{% endblock %}
+
+

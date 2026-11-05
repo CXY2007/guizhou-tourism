@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ t('订单管理') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}admin-orders{% endblock %}
+
+{% block content %}
+{% set status_labels = {"pending": t('待支付'), "paid": t('已支付'), "cancelled": t('已取消')} %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">ORDERS</p>
+    <h1 class="page-title">{{ t('订单管理') }}</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container">
+    {% include 'components/admin_nav.html' %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>{{ t('用户') }}</th><th>{{ t('景点') }}</th><th>{{ t('日期') }}</th><th>{{ t('人数') }}</th><th>{{ t('金额') }}</th><th>{{ t('状态') }}</th><th>{{ t('下单时间') }}</th></tr></thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td>{{ o.id }}</td><td>{{ o.user }}</td><td>{{ o.attraction }}</td>
+            <td>{{ o.visit_date }}</td><td>{{ o.quantity }}</td>
+            <td>{% if o.total %}¥{{ o.total }}{% else %}{{ t('免费') }}{% endif %}</td>
+            <td><span class="status-badge status-{{ o.status }}">{{ status_labels.get(o.status, o.status) }}</span></td>
+            <td>{{ o.created_at }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="pane-empty">{{ t('暂无订单') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

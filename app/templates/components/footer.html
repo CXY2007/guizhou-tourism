@@ -1,0 +1,30 @@
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <p class="footer-logo">{{ t('贵州文旅') }}</p>
+      <p class="footer-desc">{{ t('山地公园省 · 多彩贵州风') }}<br>{{ t('18 个目的地，一次说走就走的旅行。') }}</p>
+    </div>
+    <div>
+      <p class="footer-title">{{ t('探索') }}</p>
+      <a href="{{ url_for('public.attractions') }}">{{ t('全部景点') }}</a>
+      <a href="{{ url_for('public.attractions', category='自然') }}">{{ t('自然山水') }}</a>
+      <a href="{{ url_for('public.attractions', category='人文') }}">{{ t('人文村寨') }}</a>
+      <a href="{{ url_for('public.attractions', category='红色') }}">{{ t('红色记忆') }}</a>
+    </div>
+    <div>
+      <p class="footer-title">{{ t('数据') }}</p>
+      <span>{{ t('贵州省文旅厅公开信息') }}</span>
+      <span>{{ t('景区官方公告') }}</span>
+      <span>{{ t('内容持续核实更新') }}</span>
+    </div>
+    <div>
+      <p class="footer-title">{{ t('说明') }}</p>
+      <span>{{ t('课程设计作品，非商业站点') }}</span>
+      <span>{{ t('图片版权归原作者所有') }}</span>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>© {{ current_year }} {{ t('贵州文旅') }} · Guizhou Tourism</span>
+    <span>Flask · MySQL · Tailwind</span>
+  </div>
+</footer>

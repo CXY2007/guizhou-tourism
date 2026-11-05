@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ t('注册') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-visual" aria-hidden="true">
+    <div class="auth-visual-text">
+      <p class="eyebrow light">JOIN US</p>
+      <p class="auth-quote">{{ t('“先看清贵州，<br>再决定出发。”')|safe }}</p>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <p class="eyebrow">CREATE ACCOUNT</p>
+      <h1 class="auth-title">{{ t('注册') }}</h1>
+      <p class="auth-sub">{{ t('一个账号，收藏与行程都留在站内。') }}</p>
+
+      <form method="post" class="auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="field">
+          <span>{{ t('登录名') }}</span>
+          <input class="input" type="text" name="username" required minlength="3" maxlength="20" autocomplete="username" placeholder="{{ t('3–20 个字符，登录用') }}">
+        </label>
+        <label class="field">
+          <span>{{ t('密码') }}</span>
+          <input class="input" type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="{{ t('至少 6 位') }}">
+        </label>
+        <label class="field">
+          <span>{{ t('确认密码') }}</span>
+          <input class="input" type="password" name="confirm_password" required minlength="6" autocomplete="new-password" placeholder="{{ t('再输入一次') }}">
+        </label>
+        <button class="btn btn-primary auth-submit" type="submit">{{ t('创建账号') }}</button>
+      </form>
+
+      <p class="auth-switch">{{ t('已有账号？') }}<a href="{{ url_for('auth.login') }}">{{ t('去登录') }}</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

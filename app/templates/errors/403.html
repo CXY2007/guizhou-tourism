@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ t('无权访问') }} · {{ t('贵州文旅') }}{% endblock %}
+
+{% block content %}
+<section class="error-wrap">
+  <div class="container">
+    <p class="eyebrow">403</p>
+    <h1 class="error-title">{{ t(message or '你不是管理员，无法进入后台') }}</h1>
+    <p class="error-desc">{{ t('这个页面只对管理员开放。如果你是管理员，请用管理员账号登录。') }}</p>
+    <a class="btn btn-primary" href="{{ url_for('public.home') }}">{{ t('返回首页') }}</a>
+  </div>
+</section>
+{% endblock %}

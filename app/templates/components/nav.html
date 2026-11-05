@@ -1,0 +1,70 @@
+<header id="site-nav" class="site-nav" data-nav>
+  <div class="container nav-inner">
+    <a href="{{ url_for('public.home') }}" class="brand" aria-label="{{ t('贵州文旅') }} {{ t('首页') }}">
+      <span class="brand-cn">{{ t('贵州文旅') }}</span>
+      <span class="brand-en">GUIZHOU · CHINA</span>
+    </a>
+
+    <nav class="nav-links" aria-label="{{ t('主导航') }}">
+      <a href="{{ url_for('public.home') }}">{{ t('主页') }}</a>
+      <a href="{{ url_for('public.attractions') }}">{{ t('探索景点') }}</a>
+      <a href="{{ url_for('public.attractions', category='自然') }}">{{ t('自然山水') }}</a>
+      <a href="{{ url_for('public.attractions', category='人文') }}">{{ t('人文村寨') }}</a>
+      <a href="{{ url_for('public.attractions', category='红色') }}">{{ t('红色记忆') }}</a>
+      <a href="{{ url_for('public.attractions', category='科技') }}">{{ t('科技奇观') }}</a>
+      <a href="{{ url_for('public.attractions', category='季节') }}">{{ t('艳季花海') }}</a>
+      <a href="/itinerary">{{ t('行程规划') }}</a>
+      <a href="{{ url_for('public.home') }}#about">{{ t('关于') }}</a>
+    </nav>
+
+    <div class="nav-actions">
+      <form class="nav-search" role="search" action="{{ url_for('public.attractions') }}" method="get">
+        <label class="nav-search-icon" for="nav-search-input" title="{{ t('站内搜索') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path></svg></label>
+        <input id="nav-search-input" class="nav-search-input" type="search" name="q" placeholder="{{ t('搜索景点') }}" aria-label="{{ t('搜索景点') }}" value="{{ request.args.get('q', '') }}">
+      </form>
+      <div class="lang-btn" role="group" aria-label="Language">
+        <a href="{{ lang_url('zh') }}" class="{{ 'is-active' if current_lang() == 'zh' }}">中</a>
+        <span>/</span>
+        <a href="{{ lang_url('en') }}" class="{{ 'is-active' if current_lang() == 'en' }}">EN</a>
+      </div>
+      {% if current_user.is_authenticated %}
+        <a class="nav-user" href="{{ url_for('user.profile') }}">{% if current_user.avatar_url %}<img class="nav-avatar" src="{{ current_user.avatar_url }}" alt="{{ current_user.display_name }}">{% else %}<span class="nav-avatar nav-avatar-initial">{{ current_user.display_name[:1] }}</span>{% endif %}<span class="nav-user-name">{{ current_user.display_name }}</span>{% if current_user.is_admin %}<span class="nav-role-badge is-admin">{{ t('管理员') }}</span>{% else %}<span class="nav-role-badge is-user">{{ t('普通用户') }}</span>{% endif %}</a>
+        <a class="nav-text-btn" href="/admin">{{ t('后台') }}</a>
+        <form method="post" action="{{ url_for('auth.logout') }}" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="nav-text-btn" type="submit">{{ t('退出') }}</button>
+        </form>
+      {% else %}
+        <span class="nav-role-badge is-guest">{{ t('游客') }}</span>
+        <a class="nav-login" href="{{ url_for('auth.login') }}">{{ t('登录') }}</a>
+      {% endif %}
+      <button class="nav-burger" type="button" aria-label="{{ t('打开菜单') }}" aria-expanded="false" data-burger>
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-menu" data-mobile-menu hidden>
+    <form class="mobile-search" role="search" action="{{ url_for('public.attractions') }}" method="get">
+      <input type="search" name="q" placeholder="{{ t('搜索景点') }}" aria-label="{{ t('搜索景点') }}">
+      <button type="submit">{{ t('搜索') }}</button>
+    </form>
+    <a href="{{ url_for('public.home') }}">{{ t('主页') }}</a>
+    <a href="{{ url_for('public.attractions') }}">{{ t('探索景点') }}</a>
+    <a href="{{ url_for('public.attractions', category='自然') }}">{{ t('自然山水') }}</a>
+    <a href="{{ url_for('public.attractions', category='人文') }}">{{ t('人文村寨') }}</a>
+    <a href="{{ url_for('public.attractions', category='红色') }}">{{ t('红色记忆') }}</a>
+    <a href="{{ url_for('public.attractions', category='科技') }}">{{ t('科技奇观') }}</a>
+    <a href="{{ url_for('public.attractions', category='季节') }}">{{ t('艳季花海') }}</a>
+    <a href="/itinerary">{{ t('行程规划') }}</a>
+    <a href="{{ url_for('public.home') }}#about">{{ t('关于') }}</a>
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('user.profile') }}">{{ t('个人中心') }}</a>
+    <a href="/orders">{{ t('我的订单') }}</a>
+    <a href="/admin">{{ t('管理后台') }}</a>
+    {% else %}
+    <a href="{{ url_for('auth.login') }}">{{ t('登录') }} / {{ t('注册') }}</a>
+    {% endif %}
+    <a href="{{ lang_url('en' if current_lang() == 'zh' else 'zh') }}">{{ 'EN' if current_lang() == 'zh' else '中文' }}</a>
+  </div>
+</header>

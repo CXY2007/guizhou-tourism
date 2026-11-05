@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}{{ t('探索景点') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_class %}page-attractions{% if current_category == '季节' %} page-season{% elif current_category == '科技' %} page-tech{% elif current_category == '自然' %} page-nature{% elif current_category == '人文' %} page-culture{% elif current_category == '红色' %} page-red{% endif %}{% endblock %}
+
+{% block splash %}
+<div class="splash" data-splash aria-hidden="true"></div>
+<script>
+  (function () {
+    var splash = document.querySelector('[data-splash]');
+    if (!splash) return;
+    // 同一次访问里只播一次：切分类 / 翻页 / 从详情返回都不重播。
+    // 只靠 referrer 不稳（隐私设置会抹掉），再加一个会话标记兜底。
+    var SEEN_KEY = 'gz_attr_splash_seen';
+    var seen = false;
+    try { seen = sessionStorage.getItem(SEEN_KEY) === '1'; } catch (e) { seen = false; }
+    if (seen || (document.referrer || '').indexOf('/attractions') !== -1) {
+      splash.remove();
+      return;
+    }
+    try { sessionStorage.setItem(SEEN_KEY, '1'); } catch (e) { /* 隐私模式忽略 */ }
+    document.body.classList.add('splash-lock');
+    window.setTimeout(function () {
+      splash.classList.add('is-out');
+      document.body.classList.remove('splash-lock');
+      window.setTimeout(function () { splash.remove(); }, 700);
+    }, 2000);
+  })();
+</script>
+{% endblock %}
+
+{% block content %}
+{% if current_category == '红色' %}
+<div class="quote-cloud" aria-hidden="true">
+    <span style="top:10%;left:3%;font-size:62px;transform:rotate(-6deg)">为人民服务</span>
+    <span style="top:24%;left:56%;font-size:50px;transform:rotate(5deg)">星星之火 可以燎原</span>
+    <span style="top:38%;left:6%;font-size:46px;transform:rotate(-3deg)">实事求是</span>
+    <span style="top:6%;left:64%;font-size:38px;transform:rotate(7deg)">自力更生 艰苦奋斗</span>
+    <span style="top:52%;left:70%;font-size:54px;transform:rotate(-5deg)">愚公移山</span>
+    <span style="top:66%;left:4%;font-size:44px;transform:rotate(3deg)">群众是真正的英雄</span>
+    <span style="top:80%;left:34%;font-size:40px;transform:rotate(-4deg)">下定决心 不怕牺牲</span>
+    <span style="top:30%;left:26%;font-size:34px;transform:rotate(8deg)">没有调查 就没有发言权</span>
+    <span style="top:58%;left:18%;font-size:36px;transform:rotate(-7deg)">团结就是力量</span>
+    <span style="top:14%;left:40%;font-size:32px;transform:rotate(-2deg)">一切反动派都是纸老虎</span>
+    <span style="top:72%;left:62%;font-size:46px;transform:rotate(5deg)">万里长征</span>
+    <span style="top:88%;left:8%;font-size:34px;transform:rotate(-3deg)">为人民利益而死 重于泰山</span>
+  </div>
+{% endif %}
+
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">DESTINATIONS</p>
+    <h1 class="page-title">{{ t('探索景点') }}</h1>
+    <p class="page-sub">
+      {% if keyword %}{{ t('搜索“{q}”', q=keyword) }} · {% endif %}
+      {{ t('共 {n} 个目的地 · 按评分排序', n=total) }}
+    </p>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container">
+    <div class="filter-row">
+      <a class="filter-pill {% if not current_category %}is-active{% endif %}" href="{{ url_for('public.attractions') }}">{{ t('全部') }}</a>
+      {% for c in categories %}
+      <a class="filter-pill {% if current_category == c.key %}is-active{% endif %}"
+         href="{{ url_for('public.attractions', category=c.key) }}">{{ t(c.label) }}</a>
+      {% endfor %}
+    </div>
+
+    {% if items %}
+    <div class="attr-grid">
+      {% for a in items %}
+      {% set name = attr_field(a, 'name') %}
+      {% set summary = attr_field(a, 'summary') or (attr_field(a, 'description') or '')[:48] %}
+      <a class="attr-card reveal" href="{{ url_for('public.attraction_detail', slug=a.slug) }}">
+        <div class="attr-media">
+          <img src="{{ a.card_image }}" alt="{{ name }}" loading="lazy">
+          <span class="attr-tag">{{ category_label(a.category) }}</span>
+        </div>
+        <div class="attr-body">
+          <h3>{{ name }}</h3>
+          <p class="attr-meta">{{ city_label(a.city) }}{% if a.region %} · {{ region_label(a.region) }}{% endif %} · {{ price_text(a) }}</p>
+          <p class="attr-summary">{{ summary }}</p>
+          <span class="attr-rating">★ {{ a.rating_label }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if pages > 1 %}
+    <nav class="pager" aria-label="{{ t('分页') }}">
+      {% if page > 1 %}
+      <a href="{{ url_for('public.attractions', category=current_category, page=page-1) }}">{{ t('上一页') }}</a>
+      {% endif %}
+      <span>{{ page }} / {{ pages }}</span>
+      {% if page < pages %}
+      <a href="{{ url_for('public.attractions', category=current_category, page=page+1) }}">{{ t('下一页') }}</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <p class="empty-title">{{ t('这个分类还在准备中') }}</p>
+      <p class="empty-desc">{{ t('新增目的地会在内容补齐后上线。') }}</p>
+      <a class="btn btn-outline" href="{{ url_for('public.attractions') }}">{{ t('看全部景点') }}</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ t('页面不存在') }} · {{ t('贵州文旅') }}{% endblock %}
+
+{% block content %}
+<section class="error-wrap">
+  <div class="container">
+    <p class="eyebrow">404</p>
+    <h1 class="error-title">{{ t(message or '这条路还没修好') }}</h1>
+    <p class="error-desc">{{ t('你要找的页面不存在，或者还没上线。') }}</p>
+    <a class="btn btn-primary" href="{{ url_for('public.home') }}">{{ t('返回首页') }}</a>
+  </div>
+</section>
+{% endblock %}

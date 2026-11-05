@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ t('景点管理') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}admin-attractions{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">ATTRACTIONS</p>
+    <h1 class="page-title">{{ t('景点管理') }}</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container">
+    {% include 'components/admin_nav.html' %}
+    <div class="admin-toolbar">
+      <form class="admin-search" method="get" action="/admin/attractions">
+        <input class="input" type="search" name="q" value="{{ q or '' }}" placeholder="{{ t('搜索名称 / 城市') }}">
+        <select class="input" name="status">
+          <option value="" {% if not status %}selected{% endif %}>{{ t('全部') }}</option>
+          <option value="published" {% if status == 'published' %}selected{% endif %}>{{ t('已发布') }}</option>
+          <option value="draft" {% if status == 'draft' %}selected{% endif %}>{{ t('草稿') }}</option>
+        </select>
+        <button class="btn btn-outline btn-sm" type="submit">{{ t('筛选') }}</button>
+      </form>
+      <span class="admin-count">{{ t('共 {n} 个', n=total) }}</span>
+      <a class="btn btn-primary btn-sm" href="/admin/attractions/new">{{ t('新增景点') }}</a>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{{ t('封面') }}</th><th>{{ t('名称') }}</th><th>{{ t('城市 / 分类') }}</th><th>{{ t('票价') }}</th><th>{{ t('状态') }}</th><th>{{ t('操作') }}</th></tr></thead>
+        <tbody>
+          {% for a in items %}
+          <tr>
+            <td><img class="thumb" src="{{ a.card_image }}" alt="" loading="lazy"></td>
+            <td>{{ attr_field(a, 'name') }}</td>
+            <td>{{ city_label(a.city) }} / {{ category_label(a.category) }}</td>
+            <td>{{ price_text(a) }}</td>
+            <td><span class="status-badge status-{{ a.status }}">{{ t('已发布') if a.status == 'published' else t('草稿') }}</span></td>
+            <td>
+              <div class="row-actions">
+                <a class="btn btn-outline btn-sm" href="/admin/attractions/{{ a.id }}/edit">{{ t('编辑') }}</a>
+                <form method="post" action="/admin/attractions/{{ a.id }}/status" class="inline-form">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="status" value="{{ 'draft' if a.status == 'published' else 'published' }}">
+                  <button class="btn btn-outline btn-sm" type="submit">{{ t('下架') if a.status == 'published' else t('上架') }}</button>
+                </form>
+                {% set ref = (refs or {}).get(a.id, {}) %}
+                {% set parts = [] %}
+                {% if ref.ratings %}{% set _ = parts.append(ref.ratings ~ t('条评分')) %}{% endif %}
+                {% if ref.comments %}{% set _ = parts.append(ref.comments ~ t('条评论')) %}{% endif %}
+                {% if ref.favorites %}{% set _ = parts.append(ref.favorites ~ t('次收藏')) %}{% endif %}
+                {% if ref.bookings %}{% set _ = parts.append(ref.bookings ~ t('个订单')) %}{% endif %}
+                {% if ref.views %}{% set _ = parts.append(ref.views ~ t('条足迹')) %}{% endif %}
+                {% if ref.traffic %}{% set _ = parts.append(ref.traffic ~ t('行流量')) %}{% endif %}
+                {% if ref.images %}{% set _ = parts.append(ref.images ~ t('张图片')) %}{% endif %}
+                <form method="post" action="/admin/attractions/{{ a.id }}/delete" class="inline-form"
+                      data-name="{{ attr_field(a, 'name') }}"
+                      data-bookings="{{ ref.bookings or 0 }}"
+                      data-main="{{ t('确定彻底删除「{name}」？删除后不可恢复。').format(name=attr_field(a, 'name')) }}"
+                      data-detail="{{ (t('将同时删除：') ~ (parts | join('、'))) if parts else t('该景点没有关联数据。') }}"
+                      data-last="{{ t('最后确认：该景点有 {n} 个用户订单，删除后订单记录也会消失，确定继续？').format(n=ref.bookings or 0) }}"
+                      data-images="{{ ref.images or 0 }}"
+                      data-images-note="{{ t('删除后本地图片文件也会一并移除。') }}"
+                      onsubmit="return confirmDeleteAttraction(this);">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline btn-sm text-cinnabar" type="submit">{{ t('彻底删除') }}</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="pane-empty">{{ t('没有匹配的景点') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/admin_attractions.js') }}"></script>
+{% endblock %}

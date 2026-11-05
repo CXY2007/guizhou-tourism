@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ attr_field(attraction, 'name') }} · {{ t('地图') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}map-full{% endblock %}
+{% block body_class %}page-map{% endblock %}
+
+{% block content %}
+<section class="map-page">
+  <div class="map-shell"
+       id="full-map"
+       data-lng="{{ attraction.longitude if attraction.longitude is not none else '' }}"
+       data-lat="{{ attraction.latitude if attraction.latitude is not none else '' }}"
+       data-name="{{ attr_field(attraction, 'name') }}"
+       data-city="{{ city_label(attraction.city) }}"
+       data-amap-key="{{ config.AMAP_JS_KEY or '' }}"
+       data-amap-security="{{ config.AMAP_SECURITY_CODE or '' }}">
+    <p class="map-fallback">{{ t('地图加载中…') }}</p>
+  </div>
+
+  <div class="map-poi-panel" aria-label="周边 POI">
+    <div class="map-poi-controls" role="group" aria-label="周边分类">
+      <button type="button" class="map-poi-btn" data-poi-type="050000" data-poi-label="餐饮">餐饮</button>
+      <button type="button" class="map-poi-btn" data-poi-type="100000" data-poi-label="住宿">住宿</button>
+      <button type="button" class="map-poi-btn" data-poi-type="150900" data-poi-label="停车场">停车场</button>
+      <button type="button" class="map-poi-btn" data-poi-type="200300" data-poi-label="卫生间">卫生间</button>
+    </div>
+    <p class="map-poi-status" role="status" aria-live="polite" hidden></p>
+  </div>
+
+  <div class="map-hud">
+    <div class="map-hud-card">
+      <p class="eyebrow">{{ t('位置') }}</p>
+      <h1 class="map-hud-title">{{ attr_field(attraction, 'name') }}</h1>
+      <p class="map-hud-meta">
+        {{ city_label(attraction.city) }}{% if attraction.region %} · {{ region_label(attraction.region) }}{% endif %}
+        {% if attraction.longitude is not none %} · {{ '%.4f' % attraction.longitude }}, {{ '%.4f' % attraction.latitude }}{% endif %}
+      </p>
+      <div class="map-hud-actions">
+        <a class="btn btn-outline" href="{{ url_for('public.attraction_detail', slug=attraction.slug) }}">{{ t('返回详情') }}</a>
+        <button class="btn btn-primary" type="button" data-map-satellite data-label-sat="{{ t('切换卫星图') }}" data-label-std="{{ t('切换标准图') }}" data-label-unavailable="{{ t('卫星图不可用') }}">{{ t('切换卫星图') }}</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="map-hint">{{ t('滚轮缩放 · 拖动平移 · 点击标记查看景点') }}</p>
+</section>
+<script src="{{ url_for('static', filename='js/map_full.js') }}" defer></script>
+{% endblock %}

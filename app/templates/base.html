@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="{{ 'en' if current_lang() == 'en' else 'zh-CN' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ t('贵州文旅') }} · {{ t('多彩贵州') }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ t('贵州 18 个目的地，沉浸式旅行指南：山水、村寨、红色记忆与科技奇观。') }}{% endblock %}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ai-shortcuts.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="bg-paper text-ink antialiased {% block body_class %}{% endblock %}" data-page="{% block body_page %}{% endblock %}" data-lang="{{ 'en' if current_lang() == 'en' else 'zh' }}"{% if attraction is defined and attraction %} data-attraction-slug="{{ attraction.slug }}" data-attraction-name="{{ attr_field(attraction, 'name') }}"{% endif %}>
+  {% block splash %}{% endblock %}
+  {% include 'components/nav.html' %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-stack" role="status" aria-live="polite">
+      {% for category, message in messages %}
+      {# 类名用字面量：Tailwind 只会保留扫描到的类名，`flash-{{ category }}` 拼出来的会被当成未使用而丢掉样式 #}
+      <div class="flash {{ 'flash-error' if category == 'error' else 'flash-success' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>{% block content %}{% endblock %}</main>
+
+  {% include 'components/footer.html' %}
+  {% include 'components/ai_ball.html' %}
+  <script>window.__I18N = {{ i18n|tojson }};</script>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/voice.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/interactions.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/lightbox.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/ai_shortcuts.js') }}" defer></script>
+</body>
+</html>

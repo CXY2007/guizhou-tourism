@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}{{ t('个人中心') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}profile{% endblock %}
+
+{% block content %}
+<section class="profile-head">
+  <div class="container profile-head-inner">
+    <div class="profile-identity">
+      <div class="profile-avatar" aria-hidden="true">
+        {% if current_user.avatar_url %}
+        <img src="{{ current_user.avatar_url }}" alt="{{ current_user.display_name }}">
+        {% else %}
+        {{ current_user.display_name[:1] }}
+        {% endif %}
+      </div>
+      <div>
+        <p class="eyebrow">MY GUIZHOU</p>
+        <h1 class="profile-name">{{ current_user.display_name }}</h1>
+        <p class="profile-meta">@{{ current_user.username }} · UID #{{ current_user.id }} · {% if current_user.is_admin %}{{ t('管理员') }}{% else %}{{ t('旅行者') }}{% endif %}</p>
+      </div>
+    </div>
+    <dl class="profile-stats">
+      <div><dt>{{ favorites|length }}</dt><dd>{{ t('收藏') }}</dd></div>
+      <div><dt>{{ comments|length }}</dt><dd>{{ t('评论') }}</dd></div>
+      <div><dt>{{ ratings|length }}</dt><dd>{{ t('评分') }}</dd></div>
+      <div><dt>{{ views|length }}</dt><dd>{{ t('足迹') }}</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container">
+    <div class="tabs" role="tablist" aria-label="{{ t('个人中心') }}">
+      <button class="tab is-active" type="button" data-tab="favorites">{{ t('我的收藏') }}</button>
+      <button class="tab" type="button" data-tab="comments">{{ t('我的评论') }}</button>
+      <button class="tab" type="button" data-tab="ratings">{{ t('我的评分') }}</button>
+      <button class="tab" type="button" data-tab="history">{{ t('浏览足迹') }}</button>
+      <button class="tab" type="button" data-tab="itineraries">{{ t('我的行程') }}</button>
+      <button class="tab" type="button" data-tab="info">{{ t('资料') }}</button>
+      <button class="tab" type="button" data-tab="password">{{ t('密码') }}</button>
+      {% if current_user.is_admin %}
+      <a class="tab tab-link" href="{{ url_for('admin.comments') }}">{{ t('评论审核 →') }}</a>
+      {% endif %}
+    </div>
+
+    <div class="pane" data-pane="favorites">
+      {% if favorites %}
+      <div class="fav-grid">
+        {% for fav, a in favorites %}
+        <div class="fav-item" data-fav-item="{{ a.id }}">
+          <a href="{{ url_for('public.attraction_detail', slug=a.slug) }}">
+            <img src="{{ a.card_image }}" alt="{{ attr_field(a, 'name') }}" loading="lazy">
+            <span>{{ attr_field(a, 'name') }}</span>
+          </a>
+          <button class="link-danger" type="button" data-remove-fav="{{ a.id }}">{{ t('取消收藏') }}</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="pane-empty">{{ t('还没有收藏。') }}<a href="{{ url_for('public.attractions') }}">{{ t('探索景点') }}</a>{{ t('看看。') }}</p>
+      {% endif %}
+    </div>
+
+    <div class="pane" data-pane="comments" hidden>
+      {% if comments %}
+      <div class="list-rows">
+        {% for c, a in comments %}
+        <div class="list-row" data-comment-row="{{ c.id }}">
+          <div>
+            <a class="list-title" href="{{ url_for('public.attraction_detail', slug=a.slug) }}">{{ attr_field(a, 'name') }}</a>
+            {% if c.image_url %}
+            <img class="list-comment-image zoomable" src="{{ c.image_url }}" alt="{{ t('评论配图') }}" loading="lazy">
+            {% endif %}
+            <p class="list-text">{{ c.content }}</p>
+            <p class="list-meta">{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '' }}</p>
+          </div>
+          <div class="list-actions">
+            <span class="status-badge status-{{ c.status }}">
+              {% if c.status == 'pending' %}{{ t('待审核') }}{% elif c.status == 'approved' %}{{ t('已通过') }}{% else %}{{ t('已拒绝') }}{% endif %}
+            </span>
+            <button class="link-danger" type="button" data-delete-comment="{{ c.id }}">{{ t('删除') }}</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="pane-empty">{{ t('还没有评论。') }}</p>
+      {% endif %}
+    </div>
+
+    <div class="pane" data-pane="ratings" hidden>
+      {% if ratings %}
+      <div class="list-rows">
+        {% for r, a in ratings %}
+        <div class="list-row">
+          <div>
+            <a class="list-title" href="{{ url_for('public.attraction_detail', slug=a.slug) }}">{{ attr_field(a, 'name') }}</a>
+            <p class="list-meta">{{ t('评分时间：') }}{{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '' }}</p>
+          </div>
+          <span class="rating-stars" aria-label="{{ r.rating }} ★">{% for i in range(1, 6) %}<span class="{% if i <= r.rating %}is-on{% endif %}">★</span>{% endfor %}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="pane-empty">{{ t('还没有评分。') }}</p>
+      {% endif %}
+    </div>
+
+    <div class="pane" data-pane="history" hidden>
+      {% if views %}
+      <div class="list-rows">
+        {% for item in views %}
+        <div class="list-row">
+          <div class="history-row">
+            <img src="{{ item.attraction.card_image }}" alt="{{ attr_field(item.attraction, 'name') }}" loading="lazy">
+            <div>
+              <a class="list-title" href="{{ url_for('public.attraction_detail', slug=item.attraction.slug) }}">{{ attr_field(item.attraction, 'name') }}</a>
+              <p class="list-meta">{{ t('最近浏览：') }}{{ item.viewed_at.strftime('%Y-%m-%d %H:%M') if item.viewed_at else '' }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="pane-note">{{ t('每日推荐会参考这些浏览的分类偏好。') }}</p>
+      {% else %}
+      <p class="pane-empty">{{ t('还没有浏览记录。看过的景点会出现在这里，并影响每日推荐。') }}</p>
+      {% endif %}
+    </div>
+
+    <div class="pane" data-pane="itineraries" hidden>
+      {% if itineraries %}
+      <ul class="itin-list">
+        {% for itinerary in itineraries %}
+        <li class="itin-list-row" data-itinerary-row="{{ itinerary.id }}">
+          <a class="itin-list-link" href="{{ url_for('user.itinerary_saved', itinerary_id=itinerary.id) }}">
+            <span class="itin-list-title">{{ itinerary.title }}</span>
+            <span class="itin-list-meta">
+              {{ itinerary.days }} {% if current_lang() == 'en' %}{{ 'day' if itinerary.days == 1 else 'days' }}{% else %}{{ t('天') }}{% endif %}
+              {% if itinerary.created_at %} · {{ itinerary.created_at.strftime('%Y-%m-%d') }}{% endif %}
+            </span>
+            <span class="itin-list-arrow" aria-hidden="true">→</span>
+          </a>
+          <button class="link-danger" type="button" data-delete-itinerary="{{ itinerary.id }}">{{ t('删除') }}</button>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="pane-note">{{ t('点进去可以查看完整的 AI 规划。') }}</p>
+      {% else %}
+      <p class="pane-empty">{{ t('还没有保存的行程。') }}<a href="{{ url_for('user.itinerary') }}">{{ t('去规划一条 →') }}</a></p>
+      {% endif %}
+    </div>
+    <div class="pane" data-pane="info" hidden>
+      <div class="profile-form">
+        <label class="field">
+          <span>{{ t('登录名（登录用，不可修改）') }}</span>
+          <input class="input" type="text" value="{{ current_user.username }}" disabled>
+        </label>
+        <label class="field">
+          <span>{{ t('显示名（可重名，用于展示）') }}</span>
+          <input class="input" type="text" name="nickname" maxlength="30" value="{{ current_user.nickname or current_user.username }}" data-nickname-input>
+        </label>
+        <div class="nickname-actions">
+          <button class="btn btn-primary" type="button" data-save-nickname>{{ t('保存显示名') }}</button>
+          <span class="form-feedback" data-nickname-feedback></span>
+        </div>
+
+        <div class="avatar-editor">
+          <div class="profile-avatar profile-avatar-editor" data-avatar-preview>
+            {% if current_user.avatar_url %}
+            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.display_name }}" data-avatar-img>
+            {% else %}
+            <span data-avatar-initial>{{ current_user.display_name[:1] }}</span>
+            {% endif %}
+          </div>
+          <div class="avatar-actions">
+            <p class="side-label">{{ t('头像') }}</p>
+            <p class="profile-hint">{{ t('支持 jpg / png / webp，上传后自动裁成 256×256 存进数据库。') }}</p>
+            <div class="avatar-buttons">
+              <label class="btn btn-outline avatar-pick">
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-input hidden>
+                {{ t('选择图片') }}
+              </label>
+              <button class="btn btn-primary" type="button" data-avatar-upload disabled>{{ t('上传头像') }}</button>
+              {% if current_user.avatar_url %}
+              <button class="link-danger" type="button" data-avatar-remove>{{ t('移除头像') }}</button>
+              {% endif %}
+            </div>
+            <span class="form-feedback" data-avatar-feedback></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" data-pane="password" hidden>
+      <form class="profile-form" data-password-form>
+        <label class="field">
+          <span>{{ t('原密码') }}</span>
+          <input class="input" type="password" name="old_password" required autocomplete="current-password">
+        </label>
+        <label class="field">
+          <span>{{ t('新密码（至少 6 位）') }}</span>
+          <input class="input" type="password" name="new_password" required minlength="6" autocomplete="new-password">
+        </label>
+        <label class="field">
+          <span>{{ t('确认新密码') }}</span>
+          <input class="input" type="password" name="confirm_password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button class="btn btn-primary" type="submit">{{ t('修改密码') }}</button>
+        <span class="form-feedback" data-password-feedback></span>
+      </form>
+    </div>
+
+    <div class="profile-logout">
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn profile-logout-btn" type="submit">{{ t('退出登录') }}</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

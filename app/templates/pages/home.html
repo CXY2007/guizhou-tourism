@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ t('贵州文旅') }} · {{ t('多彩贵州') }}{% endblock %}
+{% block body_class %}page-home{% endblock %}
+
+{% block content %}
+<div class="home-bg" aria-hidden="true"></div>
+<section class="hero-carousel" data-carousel>
+  <div class="hero-slides" aria-hidden="true">
+    {% for s in hero_slides %}
+    <div class="hero-slide{% if loop.first %} is-active{% endif %}{% if s.poster %} is-poster{% endif %}"
+         {% if loop.first %}style="background-image:url('{{ s.image }}')"{% else %}data-bg="{{ s.image }}"{% endif %}
+         data-slide{% if s.poster %} data-poster="1"{% endif %}></div>
+    {% endfor %}
+  </div>
+  <div class="hero-scrim" aria-hidden="true"></div>
+
+  <div class="container hero-content">
+    <p class="eyebrow light">{{ t('GUIZHOU · 山地公园省') }}</p>
+    <h1 class="hero-title">{{ t('贵州，') }}<br>{{ t('在山与水之间') }}</h1>
+    <p class="hero-sub">{{ t('18 个目的地 · 9 个市州 · 五种完全不同的旅行') }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{{ url_for('public.attractions') }}">{{ t('探索 18 个景点') }}</a>
+      <button class="btn btn-ghost" type="button" data-ai-open>{{ t('让 AI 帮我规划') }}</button>
+    </div>
+    <dl class="hero-stats">
+      <div><dt>18</dt><dd>{{ t('目的地') }}</dd></div>
+      <div><dt>9</dt><dd>{{ t('市州') }}</dd></div>
+      <div><dt>5</dt><dd>{{ t('种体验') }}</dd></div>
+    </dl>
+  </div>
+
+  <a class="hero-scroll-cue" href="#categories" aria-label="{{ t('向下滚动') }}"><span class="cue-pill"><span class="cue-dot"></span></span><span class="cue-label" aria-hidden="true">{{ t('下滑') }}</span></a>
+</section>
+
+<section class="section" id="categories">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">FIVE WAYS TO GUIZHOU</p>
+      <h2 class="section-title">{{ t('五种贵州') }}</h2>
+    </div>
+    <div class="cat-grid reveal">
+      {% for c in categories %}
+      <a class="cat-card {% if not c.image %}cat-card-text{% endif %}" href="{{ url_for('public.attractions', category=c.key) }}">
+        {% if c.image %}<img src="{{ c.image }}" alt="{{ t(c.label) }}" loading="lazy">{% endif %}
+        <div class="cat-overlay"></div>
+        <div class="cat-text">
+          <span class="cat-en">{{ c.en }}</span>
+          <span class="cat-label">{{ t(c.label) }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if daily %}
+<section class="section pt-0" id="daily">
+  <div class="container">
+    <div class="daily-band">
+      <div class="daily-copy">
+        <p class="eyebrow">TODAY'S PICK</p>
+        <h2 class="section-title">{{ t('今日推荐') }}</h2>
+        <p class="daily-reason">{{ daily.reason }}</p>
+      </div>
+      <a class="daily-card" href="{{ url_for('public.attraction_detail', slug=daily.attraction.slug) }}">
+        <img src="{{ daily.attraction.card_image }}" alt="{{ attr_field(daily.attraction, 'name') }}" loading="lazy">
+        <div class="daily-card-body">
+          <span class="attr-tag">{{ category_label(daily.attraction.category) }}</span>
+          <h3>{{ attr_field(daily.attraction, 'name') }}</h3>
+          <p>{{ city_label(daily.attraction.city) }} · {{ price_text(daily.attraction) }} · ★ {{ daily.attraction.rating_label }}</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section section-discover" id="discover">
+  <div class="container">
+    <div class="section-head section-head-row">
+      <div>
+        <p class="eyebrow">SELECTED DESTINATIONS</p>
+        <h2 class="section-title">{{ t('精选目的地') }}</h2>
+      </div>
+      <a class="link-arrow" href="{{ url_for('public.attractions') }}">{{ t('查看全部 18 个 →') }}</a>
+    </div>
+    <div class="attr-grid">
+      {% for a in featured %}
+      {% set name = attr_field(a, 'name') %}
+      {% set summary = attr_field(a, 'summary') or (attr_field(a, 'description') or '')[:48] %}
+      <a class="attr-card reveal" href="{{ url_for('public.attraction_detail', slug=a.slug) }}">
+        <div class="attr-media">
+          <img src="{{ a.card_image }}" alt="{{ name }}" loading="lazy">
+          <span class="attr-tag">{{ category_label(a.category) }}</span>
+        </div>
+        <div class="attr-body">
+          <h3>{{ name }}</h3>
+          <p class="attr-meta">{{ city_label(a.city) }}{% if a.region %} · {{ region_label(a.region) }}{% endif %} · {{ price_text(a) }}</p>
+          <p class="attr-summary">{{ summary }}</p>
+          <span class="attr-rating">★ {{ a.rating_label }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="season-band">
+  <div class="container season-inner">
+    <div class="season-copy">
+      <p class="eyebrow light">IN SEASON</p>
+      <h2 class="section-title light">{{ t('艳季 · 花海') }}</h2>
+      <p class="season-desc">{{ t('三月樱花，三到四月杜鹃。花期与票务以景区官方公告为准。') }}</p>
+    </div>
+    <div class="season-cards">
+      {% for s in seasonal_picks %}
+      <a class="season-card season-card-photo" href="{{ url_for('public.attraction_detail', slug=s.slug) }}">
+        <img src="{{ s.attraction.card_image }}" alt="{{ attr_field(s.attraction, 'name') }}" loading="lazy">
+        <div>
+          <span>{{ t(s.months) }}</span>
+          <strong>{{ attr_field(s.attraction, 'name') }}</strong>
+          <em>{{ price_text(s.attraction) }}{% if s.attraction.open_time %} · {{ s.attraction.open_time }}{% endif %}</em>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="ai-band">
+  <div class="container ai-band-inner">
+    <div>
+      <p class="eyebrow">AI TRAVEL PLANNER</p>
+      <h2 class="section-title">{{ t('不知道从哪开始？') }}</h2>
+      <p class="ai-band-desc">{{ t('告诉它你有几天、想看什么，它会给你一条能走通的路线。') }}</p>
+    </div>
+    <button class="btn btn-primary" type="button" data-ai-open>{{ t('打开 AI 助手') }}</button>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container about-grid">
+    <p class="eyebrow">ABOUT</p>
+    <div>
+      <h2 class="section-title">{{ t('关于本站') }}</h2>
+      <p class="about-text">{{ t('一个以贵州为目的地的课程设计作品：18 个目的地，覆盖自然山水、人文村寨、红色记忆、科技奇观与艳季花海。景点信息来自贵州省文旅厅与景区官方公告，持续核实更新；图片版权归原作者所有。') }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>玻璃拟态样张 · 贵州文旅</title>
+<style>
+  :root {
+    --ink: #0E2A24;
+    --teal: #1F4E5A;
+    --cinnabar: #B83A2D;
+    --paper: #F4EFE6;
+    --gold: #C9A227;
+    --mist: #8FA6A0;
+    --radius: 20px;
+    --blur: 20px;
+    --line: 1px solid rgba(255, 255, 255, .16);
+    --glass:
+      linear-gradient(135deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 42%),
+      linear-gradient(135deg, rgba(20, 42, 36, .58), rgba(14, 42, 36, .34));
+    --glass-soft:
+      linear-gradient(135deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, 0) 46%),
+      linear-gradient(135deg, rgba(20, 42, 36, .42), rgba(14, 42, 36, .26));
+    --shadow: 0 24px 64px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .16);
+    --font-display: "Noto Serif SC", "Songti SC", "STSong", serif;
+    --font-body: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  /* 实验：锚点平滑 + 固定导航留出落点空间（和正式站一致的基线） */
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* 背景：一张实景照片 + 渐变罩，玻璃才有东西可“磨” */
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: #0E2A24 url("bg.jpg") center 60% / cover no-repeat;
+  }
+  .bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(14, 42, 36, .72) 0%, rgba(14, 42, 36, .18) 28%, rgba(14, 42, 36, .30) 62%, rgba(14, 42, 36, .88) 100%),
+      radial-gradient(1200px 600px at 15% 20%, rgba(184, 58, 45, .16), transparent 60%);
+  }
+
+  /* ============ 玻璃配方 ============ */
+  .glass {
+    position: relative;
+    background: var(--glass);
+    border: var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+    backdrop-filter: blur(var(--blur)) saturate(160%);
+  }
+  .glass::after {            /* 磨砂颗粒，压掉大面积色带 */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: .05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .glass > * { position: relative; z-index: 1; }
+
+  .glass-soft {
+    background: var(--glass-soft);
+    border-color: rgba(255, 255, 255, .12);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass { background: rgba(14, 42, 36, .88); }
+    .glass-soft { background: rgba(20, 42, 36, .85); }
+  }
+
+  /* ============ 导航 ============ */
+  .site-nav {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    width: min(1240px, calc(100% - 48px));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 12px 20px;
+    border-radius: 999px;
+  }
+  .brand { display: flex; flex-direction: column; line-height: 1; }
+  .brand-cn { font-family: var(--font-display); font-size: 18px; letter-spacing: .18em; }
+  .brand-en { margin-top: 5px; font-size: 9px; letter-spacing: .3em; opacity: .55; }
+  .nav-links { display: flex; gap: 28px; font-size: 13px; }
+  .nav-links a { color: var(--paper); text-decoration: none; opacity: .78; transition: opacity .2s; }
+  .nav-links a:hover { opacity: 1; }
+  .nav-actions { display: flex; align-items: center; gap: 16px; font-size: 12px; }
+  .lang { opacity: .6; letter-spacing: .08em; }
+  .lang b { color: var(--cinnabar); font-weight: 500; opacity: 1; }
+  .nav-login {
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .28);
+    background: rgba(255, 255, 255, .04);
+    color: var(--paper);
+    font-size: 12px;
+    text-decoration: none;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: background .2s, border-color .2s;
+  }
+  .nav-login:hover { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .45); }
+  .burger {
+    display: none;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    background: rgba(255, 255, 255, .05);
+    cursor: pointer;
+  }
+  .burger span { display: block; width: 16px; height: 1px; margin: 4px auto; background: var(--paper); }
+
+  /* ============ 主体 ============ */
+  main {
+    position: relative;
+    z-index: 1;
+    width: min(1240px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 148px 0 56px;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 372px;
+    gap: 56px;
+    align-items: start;
+  }
+
+  .eyebrow {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: rgba(244, 239, 230, .62);
+  }
+  .eyebrow.cinnabar { color: #E4776B; }
+  .eyebrow.gold { color: var(--gold); }
+
+  h1 {
+    margin: 22px 0 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(44px, 5.6vw, 76px);
+    line-height: 1.08;
+    letter-spacing: .01em;
+    text-shadow: 0 2px 40px rgba(0, 0, 0, .35);
+  }
+  h1 em { font-style: normal; color: var(--gold); }
+
+  .sub {
+    margin: 22px 0 0;
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(244, 239, 230, .72);
+    max-width: 34em;
+  }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-size: 14px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1), background .22s, border-color .22s;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--cinnabar); color: #fff; box-shadow: 0 12px 32px rgba(184, 58, 45, .32); }
+  .btn-primary:hover { transform: translateY(-2px); background: #C94A3C; }
+  .btn-glass {
+    background: rgba(255, 255, 255, .07);
+    border-color: rgba(255, 255, 255, .22);
+    color: var(--paper);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  .btn-glass:hover { transform: translateY(-2px); background: rgba(255, 255, 255, .14); }
+
+  /* ============ 要点卡片 ============ */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 72px;
+  }
+  .card {
+    padding: 26px;
+    border-radius: 22px;
+    transition: transform .24s cubic-bezier(.22, 1, .36, 1), box-shadow .24s;
+  }
+  .card h3, .card .desc, .card .meta { text-shadow: 0 1px 2px rgba(0, 0, 0, .28); }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 32px 72px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .2); }
+  .card h3 {
+    margin: 12px 0 6px;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: .02em;
+  }
+  .card .meta { margin: 0; font-size: 12px; color: rgba(244, 239, 230, .58); }
+  .card .desc { margin: 14px 0 0; font-size: 13px; line-height: 1.7; color: rgba(244, 239, 230, .78); }
+  .card-link {
+    display: inline-block;
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: .04em;
+  }
+  .card-link:hover { color: #E0B93A; }
+
+  /* ============ AI 面板 ============ */
+  .ai-panel { overflow: hidden; }
+  .ai-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 18px 20px;
+    background: rgba(14, 42, 36, .45);
+    border-bottom: 1px solid rgba(255, 255, 255, .10);
+  }
+  .ai-title { margin: 0; font-size: 13px; letter-spacing: .12em; }
+  .ai-sub { margin: 6px 0 0; font-size: 11px; color: rgba(244, 239, 230, .55); }
+  .ai-close {
+    border: 0; background: transparent; color: rgba(255, 255, 255, .55);
+    font-size: 22px; line-height: 1; cursor: pointer; padding: 0 2px;
+  }
+  .ai-close:hover { color: #fff; }
+
+  .ai-msgs { padding: 16px; display: flex; flex-direction: column; gap: 10px; max-height: 210px; overflow-y: auto; }
+  .msg {
+    max-width: 86%;
+    padding: 11px 14px;
+    border-radius: 16px;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .msg-bot {
+    background: rgba(255, 255, 255, .10);
+    border: 1px solid rgba(255, 255, 255, .10);
+    border-top-left-radius: 6px;
+    color: rgba(244, 239, 230, .92);
+  }
+  .msg-user {
+    margin-left: auto;
+    background: rgba(31, 78, 90, .78);
+    border: 1px solid rgba(143, 166, 160, .25);
+    border-top-right-radius: 6px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip {
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    background: rgba(255, 255, 255, .06);
+    color: rgba(244, 239, 230, .85);
+    font-size: 11px;
+    text-decoration: none;
+  }
+  .chip:hover { background: rgba(255, 255, 255, .14); }
+
+  .ai-suggest { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; }
+  .sug {
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .05);
+    color: rgba(244, 239, 230, .78);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .sug:hover { background: rgba(255, 255, 255, .12); color: var(--paper); }
+
+  .ai-input {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 16px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+  }
+  .ai-input input {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    background: rgba(255, 255, 255, .07);
+    color: var(--paper);
+    font-size: 12px;
+    outline: none;
+  }
+  .ai-input input::placeholder { color: rgba(244, 239, 230, .4); }
+  .ai-input input:focus { border-color: rgba(201, 162, 39, .6); }
+  .ai-input button {
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    background: var(--cinnabar);
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .ai-input button:hover { background: #C94A3C; }
+
+  /* ============ 顶部提示 ============ */
+  .toast {
+    position: fixed;
+    top: 92px;
+    right: max(24px, calc((100vw - 1240px) / 2));
+    z-index: 30;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: rgba(244, 239, 230, .9);
+  }
+  .toast b { color: var(--gold); font-weight: 500; }
+
+  /* ============ 底部说明条 ============ */
+  .spec {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+    margin-top: 40px;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: rgba(244, 239, 230, .55);
+  }
+  .spec strong { color: var(--gold); font-weight: 500; letter-spacing: .2em; }
+
+  /* ============ 滚动入场：到临界点主动滑上来 ============ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(56px) scale(.985);
+    transition:
+      opacity .8s cubic-bezier(.16, 1, .3, 1),
+      transform .8s cubic-bezier(.16, 1, .3, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  /* 卡片错峰：一排 3 张依次滑上来 */
+  .cards .card:nth-child(2) { --reveal-delay: 90ms; }
+  .cards .card:nth-child(3) { --reveal-delay: 180ms; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* ============ 长页测试区（给滚动实验留出滚动距离） ============ */
+  .long {
+    width: min(1240px, calc(100% - 48px));
+    margin: 96px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .long .card { padding: 28px 32px; }
+  .long h2 {
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+  }
+  .long p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.95;
+    color: rgba(244, 239, 230, .74);
+  }
+
+  /* ============ 响应式 ============ */
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; }
+    .ai-panel { max-width: 520px; }
+    .cards { grid-template-columns: 1fr; margin-top: 48px; }
+  }
+  @media (max-width: 720px) {
+    .toast { display: none; }
+    main { padding-top: 118px; }
+    .site-nav { top: 12px; padding: 10px 14px; border-radius: 18px; }
+    .nav-links { display: none; }
+    .nav-actions .lang { display: none; }
+    .burger { display: block; }
+    h1 { font-size: clamp(36px, 11vw, 48px); }
+    .toast { top: 76px; right: 16px; }
+    .spec { font-size: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .card { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  <header class="site-nav glass glass-soft">
+    <div class="brand">
+      <span class="brand-cn">贵州文旅</span>
+      <span class="brand-en">GUIZHOU · CHINA</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#cards">探索景点</a>
+      <a href="#spec">当季花海</a>
+      <a href="#">红色记忆</a>
+      <a href="#">行程</a>
+    </nav>
+    <div class="nav-actions">
+      <span class="lang">中 / <b>EN</b></span>
+      <a class="nav-login" href="#">登录</a>
+      <button class="burger" type="button" aria-label="打开菜单"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <div class="toast glass" role="status">已收藏 · <b>黄果树瀑布</b></div>
+
+  <main>
+    <div class="hero">
+      <div>
+        <p class="eyebrow">GUIZHOU · MOUNTAIN PARK PROVINCE</p>
+        <h1>贵州，<br>在山与水之间</h1>
+        <p class="sub">18 个目的地 · 9 个市州 · 五种完全不同的旅行。从黄果树的轰鸣到千户苗寨的灯火，玻璃背后，是一整片山地公园省。</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#">探索 18 个景点</a>
+          <a class="btn btn-glass" href="#">让 AI 帮我规划</a>
+        </div>
+      </div>
+
+      <aside class="ai-panel glass" aria-label="AI 旅行助手">
+        <div class="ai-head">
+          <div>
+            <p class="ai-title">AI 旅行助手</p>
+            <p class="ai-sub">贵州 18 个目的地，问我怎么玩</p>
+          </div>
+          <button class="ai-close" type="button" aria-label="关闭">×</button>
+        </div>
+        <div class="ai-msgs">
+          <div class="msg msg-bot">你好，我是贵州文旅 AI 助手。说一句，我带你去。</div>
+          <div class="msg msg-user">带我去黄果树</div>
+          <div class="msg msg-bot">
+            黄果树瀑布在安顺，门票 ¥160，建议玩 4–6 小时。
+            <span class="chips">
+              <a class="chip" href="#">黄果树瀑布</a>
+              <a class="chip" href="#">门票 ¥160</a>
+            </span>
+          </div>
+          <div class="msg msg-user">那它的开放时间呢？</div>
+          <div class="msg msg-bot">黄果树瀑布 07:30–18:00 开放，建议早上进园避开人流。</div>
+          <div class="msg msg-bot">需要我帮你排一个 3 天行程，或查一下安顺的天气吗？</div>
+        </div>
+        <div class="ai-suggest">
+          <button class="sug" type="button">黄果树天气</button>
+          <button class="sug" type="button">找红色景点</button>
+          <button class="sug" type="button">帮我排 3 天行程</button>
+        </div>
+        <form class="ai-input" onsubmit="return false">
+          <input type="text" placeholder="说一句，比如：带我去黄果树" aria-label="对 AI 说一句话">
+          <button type="submit">发送</button>
+        </form>
+      </aside>
+    </div>
+
+    <section class="cards" id="cards" aria-label="精选目的地">
+      <article class="card glass reveal">
+        <p class="eyebrow cinnabar">自然山水 · NATURE</p>
+        <h3>黄果树瀑布</h3>
+        <p class="meta">安顺 · 门票 ¥160 · 建议 4–6 小时</p>
+        <p class="desc">亚洲第一瀑，雨季水量最盛，水雾里常能看见彩虹。</p>
+        <a class="card-link" href="#">查看详情 →</a>
+      </article>
+      <article class="card glass reveal">
+        <p class="eyebrow">人文村寨 · CULTURE</p>
+        <h3>西江千户苗寨</h3>
+        <p class="meta">黔东南 · 门票 ¥90 · 夜景最佳</p>
+        <p class="desc">上千座吊脚楼顺着山势铺开，入夜灯火像落在山里的星河。</p>
+        <a class="card-link" href="#">查看详情 →</a>
+      </article>
+      <article class="card glass reveal">
+        <p class="eyebrow">科技奇观 · SCIENCE</p>
+        <h3>中国天眼</h3>
+        <p class="meta">平塘 · 预约参观 · 天文小镇</p>
+        <p class="desc">世界最大的单口径射电望远镜，山坳里安静地听着宇宙。</p>
+        <a class="card-link" href="#">查看详情 →</a>
+      </article>
+    </section>
+
+    <section class="long" aria-label="滚动测试区" id="long">
+      <article class="card glass reveal">
+        <h2>滚动测试区 · 一</h2>
+        <p>这一段只是为了把页面拉长，方便测量滚轮与 PageDown 的手感。玻璃面板、固定背景、颗粒与光效都保持和首页一致的配方。</p>
+        <p>当你滚动到这里时，背景应该保持不动，面板从上方滑过；如果平滑滚动生效，滚轮会带一点惯性，而不是一格一格地跳。</p>
+        <p>如果手感发飘、或者触控板上出现“过冲”，那就说明这个库不适合直接上正式站。</p>
+      </article>
+      <article class="card glass reveal">
+        <h2>滚动测试区 · 二</h2>
+        <p>锚点测试：点顶部导航的「探索景点」应落在精选卡片区，且卡片标题不会被固定导航挡住（scroll-padding-top 96px）。</p>
+        <p>键盘测试：PageDown / PageUp / Home / End 在两种模式下都应可用；平滑模式下应该是滑过去，而不是瞬间跳过去。</p>
+        <p>内部滚动测试：鼠标移到 AI 面板的聊天记录上滚动，只有聊天区滚动，页面本身不应移动。</p>
+      </article>
+      <article class="card glass reveal">
+        <h2>滚动测试区 · 三</h2>
+        <p>这一段结束之后就是页脚。滚到底时，背景保持固定，页脚从下方进入，应该没有明显的掉帧或跳变。</p>
+        <p>如果你在 1440 宽度下滚动，帧率应接近 60fps；如果明显掉帧，需要先排查背景模糊或玻璃层数。</p>
+      </article>
+    </section>
+
+    <footer class="spec glass" id="spec">
+      <strong>GLASS DEMO</strong>
+      <span>纯 CSS 样张 · 不影响现有站点</span>
+      <span>blur 20px · saturate 160%</span>
+      <span>1px 高光描边 · 内阴影 · 颗粒 5%</span>
+      <span>@supports 不支持时自动降级为实色</span>
+    </footer>
+  </main>
+
+  <script>
+    /* 滚动入场：元素进入视口下缘 14% 时，主动滑上来（只播一次） */
+    (function () {
+      var items = document.querySelectorAll('.reveal');
+      if (!items.length) return;
+      if (!('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('is-visible'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        });
+      }, { rootMargin: '0px 0px -14% 0px', threshold: 0.12 });
+      items.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+
+  <script>
+    /* 实验：smoothscroll 只在桌面 + 非「减少动效」时启用；内部滚动容器不被劫持 */
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var fine = window.matchMedia('(pointer: fine)').matches;
+      var mobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var native = /[?&]native=1/.test(location.search);
+      var root = document.documentElement;
+
+      if (native || reduce || !fine || mobile) {
+        root.setAttribute('data-smooth', 'native');
+        return;
+      }
+      root.setAttribute('data-smooth', 'on');
+
+      document.querySelectorAll('.ai-msgs, input, textarea, select').forEach(function (el) {
+        el.addEventListener('wheel', function (e) { e.stopPropagation(); }, { capture: true, passive: true });
+      });
+
+      window.SmoothScrollOptions = {
+        frameRate: 144,
+        animationTime: 600,
+        stepSize: 100,
+        pulseAlgorithm: true,
+        pulseScale: 4,
+        pulseNormalize: 1,
+        accelerationDelta: 50,
+        accelerationMax: 3,
+        keyboardSupport: true,
+        arrowScroll: 50,
+        fixedBackground: true
+      };
+
+      var script = document.createElement('script');
+      script.src = 'smoothscroll.js';
+      script.onload = function () { root.setAttribute('data-smooth', 'loaded'); };
+      document.head.appendChild(script);
+    })();
+  </script>
+</body>
+</html>

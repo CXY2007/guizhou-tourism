@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}{{ itinerary.title }} · {{ t('我的行程') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}itinerary-saved{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">
+      <a class="crumb-link" href="{{ url_for('user.profile') }}">{{ t('个人中心') }}</a>
+      <span aria-hidden="true">/</span>
+      <span>{{ t('我的行程') }}</span>
+    </p>
+    <h1 class="page-title">{{ itinerary.title }}</h1>
+    <p class="page-sub">
+      {{ itinerary.days }} {% if current_lang() == 'en' %}{{ 'day' if itinerary.days == 1 else 'days' }}{% else %}{{ t('天') }}{% endif %}{% if itinerary.created_at %} · {{ t('保存于') }} {{ itinerary.created_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container itin" data-saved-itinerary>
+    {% if brief %}
+    <div class="itin-brief">
+      {% if brief.summary %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('行程总览') }}</span>
+          <span class="itin-brief-text">{{ brief.summary }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if brief.transport %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('出发推荐方式') }}</span>
+          <span class="itin-brief-text">{{ brief.transport }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if brief.route %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('路途经过') }}</span>
+          <span class="itin-brief-text">{{ brief.route|join(' → ') }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if brief.weather %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('天气') }}</span>
+          <span class="itin-brief-text">{{ brief.weather }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if brief.clothing %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('穿衣推荐') }}</span>
+          <span class="itin-brief-text">{{ brief.clothing }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if brief.lodging %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('住宿安排') }}</span>
+          <span class="itin-brief-text">{{ brief.lodging }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% if brief.budget_plan %}
+      <div class="itin-brief-card">
+        <div class="itin-brief-body">
+          <span class="itin-brief-label">{{ t('预算分配') }}</span>
+          <span class="itin-brief-text">
+            {% for item in brief.budget_plan %}{{ item.item }} {{ item.amount }}{% if not loop.last %} · {% endif %}{% endfor %}
+          </span>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if brief.hotels %}
+    <div class="itin-lodging">
+      {% for stay in brief.hotels.stays %}
+      <div class="itin-lodging-group">
+        <div class="itin-lodging-head">
+          <span class="itin-lodging-city">{{ stay.city }} · {{ t('住宿推荐') }}</span>
+          {% if stay.nights %}<span class="itin-lodging-nights">{% if current_lang() == 'en' %}{{ stay.nights }} {{ 'night' if stay.nights == 1 else 'nights' }}{% else %}{{ t('住') }} {{ stay.nights }} {{ t('晚') }}{% endif %}</span>{% endif %}
+          {% if stay.place %}<span class="itin-lodging-place">{{ stay.place }}</span>{% endif %}
+        </div>
+        <div class="itin-lodging-grid">
+          {% for hotel in stay.hotels %}
+          <div class="itin-lodging-card">
+            {% if hotel.image %}<img class="itin-lodging-photo" src="{{ hotel.image }}" alt="{{ hotel.name }}" loading="lazy" onerror="this.remove()">{% endif %}
+            <div class="itin-lodging-body">
+              <span class="itin-lodging-name">{{ hotel.name }}</span>
+              {% if hotel.star or hotel.address %}
+              <span class="itin-lodging-meta">{% if hotel.star %}★ {{ hotel.star }}{% endif %}{% if hotel.star and hotel.address %} · {% endif %}{{ hotel.address }}</span>
+              {% endif %}
+              <div class="itin-lodging-foot">
+                <span class="itin-lodging-price">{{ hotel.price_text or t('价格以预订页为准') }}</span>
+                {% if hotel.booking_url %}<a class="itin-lodging-go" href="{{ hotel.booking_url }}" target="_blank" rel="noopener noreferrer">{{ t('查看房价') }}</a>{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+      {% if brief.hotels.note %}<p class="itin-lodging-note">{{ brief.hotels.note }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    {# 冲突 + 预算沙盘：复用 itinerary.js 的同一套渲染。
+       数据优先取 _saved_plan 收敛后的 brief；老版本后端会过滤掉这两个键，
+       所以再兜底读 items.brief 里的原始快照（保存时由前端一并写入）。 #}
+    {% set raw_brief = (itinerary.items.get('brief') if itinerary.items is mapping else none) or {} %}
+    {% set saved_conflicts = (brief.get('conflicts') if brief is mapping else none) or raw_brief.get('conflicts') %}
+    {% set saved_budget = (brief.get('budget') if brief is mapping else none) or raw_brief.get('budget') %}
+    <div class="itin-conflicts" data-conflicts hidden></div>
+    <div class="itin-budget-slot" data-budget hidden></div>
+    {% if saved_conflicts %}
+    <script type="application/json" data-saved-conflicts>{{ saved_conflicts|tojson }}</script>
+    {% endif %}
+    {% if saved_budget %}
+    <script type="application/json" data-saved-budget>{{ saved_budget|tojson }}</script>
+    {% endif %}
+
+    <div class="itin-result">
+      {% for day in days %}
+      <div class="itin-day">
+        <div class="itin-day-head">
+          <h3 class="itin-day-title">{% if current_lang() == 'en' %}Day {{ day.day }}{% else %}{{ t('第') }} {{ day.day }} {{ t('天') }}{% endif %}</h3>
+          {% if day.theme %}<span class="itin-day-theme">{{ day.theme }}</span>{% endif %}
+        </div>
+        {% for slot in day.slots %}
+        <div class="itin-slot">
+          <span class="itin-slot-label">{{ slot.period }}</span>
+          <div class="itin-slot-body">
+            {% if slot.slug %}
+            <a class="itin-slot-name" href="{{ url_for('public.attraction_detail', slug=slot.slug) }}">{{ slot.title }}</a>
+            {% else %}
+            <span class="itin-slot-name">{{ slot.title }}</span>
+            {% endif %}
+            {% if slot.city %}<span class="itin-slot-city">{{ slot.city }}</span>{% endif %}
+            {% if slot.detail %}<span class="itin-slot-detail">{{ slot.detail }}</span>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+        {% if day.tips %}<p class="itin-day-tips">{{ day.tips }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if brief.notes %}
+    <ul class="itin-notes">
+      {% for note in brief.notes %}<li>{{ note }}</li>{% endfor %}
+      {% if brief.xhs %}
+      <li class="itin-xhs">
+        {% if brief.xhs.source == 'live' %}{{ t('已参考小红书实时笔记') }} {{ brief.xhs.count }} {{ t('条') }}{% else %}{{ t('已参考小红书风格笔记') }} {{ brief.xhs.count }} {{ t('条（本地缓存）') }}{% endif %}
+      </li>
+      {% endif %}
+    </ul>
+    {% elif brief.xhs %}
+    <ul class="itin-notes">
+      <li class="itin-xhs">
+        {% if brief.xhs.source == 'live' %}{{ t('已参考小红书实时笔记') }} {{ brief.xhs.count }} {{ t('条') }}{% else %}{{ t('已参考小红书风格笔记') }} {{ brief.xhs.count }} {{ t('条（本地缓存）') }}{% endif %}
+      </li>
+    </ul>
+    {% endif %}
+
+    <div class="itin-saved-actions">
+      <a class="btn btn-outline" href="{{ url_for('user.profile') }}">{{ t('返回个人中心') }}</a>
+      <button class="link-danger" type="button" data-delete-itinerary="{{ itinerary.id }}">{{ t('删除这条行程') }}</button>
+    </div>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/itinerary.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}{{ attr_field(attraction, 'name') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block description %}{{ attr_field(attraction, 'summary') or attr_field(attraction, 'name') }}{% endblock %}
+{% block body_page %}detail{% endblock %}
+{% block body_class %}page-detail{% if attraction.category.startswith('自然') %} page-detail-nature page-nature{% elif attraction.category.startswith('人文') %} page-detail-culture page-culture{% elif attraction.category.startswith('红色') %} page-detail-red page-red{% elif attraction.category.startswith('科技') %} page-detail-tech page-tech{% elif attraction.category.startswith('季节') %} page-detail-season page-season{% endif %}{% endblock %}
+
+{% block content %}
+{% set name = attr_field(attraction, 'name') %}
+{% set summary = attr_field(attraction, 'summary') %}
+{% set description = attr_field(attraction, 'description') %}
+{% set poetic = attr_field(attraction, 'poetic_description') %}
+<section class="detail-hero">
+  <img class="detail-cover zoomable" src="{{ attraction.card_image }}" alt="{{ name }}">
+  <div class="detail-overlay" aria-hidden="true"></div>
+  <div class="container detail-hero-content">
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a href="{{ url_for('public.home') }}">{{ t('首页') }}</a>
+      <span>/</span>
+      <a href="{{ url_for('public.attractions') }}">{{ t('探索景点') }}</a>
+      <span>/</span>
+      <span>{{ name }}</span>
+    </nav>
+    <p class="eyebrow light">{{ category_label(attraction.category) }} · {{ city_label(attraction.city) }}</p>
+    <h1 class="detail-title">{{ name }}</h1>
+    <p class="detail-sub">{{ summary or (description or '')[:60] }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container detail-grid">
+    <div class="detail-main">
+      {% if poetic %}
+      <p class="detail-poetic">{{ poetic }}</p>
+      {% endif %}
+      <div class="detail-text">{{ description }}</div>
+
+      <dl class="facts">
+        <div><dt>{{ t('地址') }}</dt><dd>{{ attr_field(attraction, 'address') or t('待补充') }}</dd></div>
+        <div><dt>{{ t('开放时间') }}</dt><dd>{{ attr_field(attraction, 'open_time') or t('以景区公告为准') }}</dd></div>
+        <div><dt>{{ t('门票') }}</dt><dd>{{ price_text(attraction) }}{% if attr_field(attraction, 'ticket_note') %} · {{ attr_field(attraction, 'ticket_note') }}{% endif %}</dd></div>
+        <div><dt>{{ t('建议游玩') }}</dt><dd>{% if attraction.visit_duration %}{{ (attraction.visit_duration / 60) | round(1) }} {{ t('小时') }}{% else %}{{ t('待补充') }}{% endif %}</dd></div>
+        <div><dt>{{ t('最佳月份') }}</dt><dd>{{ attr_field(attraction, 'best_months') or t('全年') }}</dd></div>
+        <div><dt>{{ t('分类') }}</dt><dd>{{ category_label(attraction.category) }}</dd></div>
+      </dl>
+
+      <div class="weather-card" data-weather data-attraction-id="{{ attraction.id }}">
+        <p class="weather-loading">{{ t('天气加载中…') }}</p>
+      </div>
+    </div>
+
+    <aside class="detail-side">
+      <div class="side-card" data-detail
+           data-attraction-id="{{ attraction.id }}"
+           data-logged-in="{{ '1' if current_user.is_authenticated else '0' }}">
+        <p class="side-label">{{ t('评分') }}</p>
+        <p class="side-rating"><span data-avg>{{ attraction.rating_label }}</span> <span>/ 5</span></p>
+        <p class="side-count"><span data-count>{{ attraction.rating_count or 0 }}</span> {{ t('人评价') }}</p>
+        <div class="star-input" data-stars role="group" aria-label="{{ t('给景点打分') }}">
+          {% for i in range(1, 6) %}
+          <button type="button" class="star" data-value="{{ i }}" aria-label="{{ i }} ★">★</button>
+          {% endfor %}
+        </div>
+        <p class="side-hint" data-rating-hint>{% if current_user.is_authenticated %}{{ t('点星星打分') }}{% else %}{{ t('登录后可评分') }}{% endif %}</p>
+        <div class="side-actions">
+          <button class="btn btn-outline" type="button" data-favorite data-favorited="0">{{ t('收藏') }}</button>
+          <a class="btn btn-primary" href="{{ url_for('user.booking', attraction_id=attraction.id) }}">{{ t('预订') }}</a>
+        </div>
+      </div>
+
+      <div class="side-card side-map-card">
+        <div class="side-map-head">
+          <p class="side-label">{{ t('位置') }}</p>
+          <a class="side-map-link" href="{{ url_for('public.attraction_map', slug=attraction.slug) }}">{{ t('查看附近停车场、住宿、卫生间、餐饮') }} ↗</a>
+        </div>
+        <div id="detail-map" class="detail-map"
+             data-lng="{{ attraction.longitude if attraction.longitude is not none else '' }}"
+             data-lat="{{ attraction.latitude if attraction.latitude is not none else '' }}"
+             data-name="{{ name }}"
+             data-amap-key="{{ config.AMAP_JS_KEY or '' }}"
+             data-amap-security="{{ config.AMAP_SECURITY_CODE or '' }}">
+          <p class="map-fallback">{{ t('地图加载中…') }}</p>
+        </div>
+      </div>
+
+      {% if attraction.images %}
+      <div class="side-gallery">
+        {% for img in attraction.images[:6] %}
+        <img class="zoomable" src="{{ img.image_url }}" alt="{{ name }} {{ loop.index }}" loading="lazy">
+        {% endfor %}
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">RATINGS</p>
+      <h2 class="section-title">{{ t('评分概览') }}</h2>
+    </div>
+    <div class="chart-grid" data-rating-charts data-attraction-id="{{ attraction.id }}">
+      <div class="chart-card">
+        <p class="side-label">{{ t('星级分布') }}</p>
+        <div class="chart-box" data-chart="pie"></div>
+      </div>
+      <div class="chart-card">
+        <p class="side-label">{{ t('近 8 个月平均分') }}</p>
+        <div class="chart-box" data-chart="line"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container">
+    <div class="comments-head">
+      <div>
+        <p class="eyebrow">COMMENTS</p>
+        <h2 class="section-title">{{ t('旅行者说') }}</h2>
+      </div>
+      <p class="comments-note">{{ t('评论经管理员审核后展示') }}</p>
+    </div>
+
+    <div class="comment-form-wrap">
+      {% if current_user.is_authenticated %}
+      <form class="comment-form" data-comment-form>
+        <div class="comment-reply-chip" data-reply-chip hidden>
+          <span data-reply-target></span>
+          <button class="link-danger" type="button" data-reply-cancel>{{ t('取消') }}</button>
+        </div>
+        <textarea name="content" maxlength="500" rows="3" placeholder="{{ t('写下你的见闻（1–500 字）…') }}" data-comment-input></textarea>
+        <div class="comment-media" data-comment-media hidden>
+          <img data-comment-preview alt="{{ t('评论配图预览') }}">
+          <button class="link-danger" type="button" data-comment-clear>{{ t('移除图片') }}</button>
+        </div>
+        <div class="comment-form-actions">
+          <label class="comment-pick">
+            <input type="file" accept="image/jpeg,image/png,image/webp" data-comment-file hidden>
+            <span class="comment-pick-btn">{{ t('添加图片') }}</span>
+          </label>
+          <span class="comment-hint" data-comment-hint></span>
+          <button class="btn btn-primary" type="submit">{{ t('发表评论') }}</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="comment-login">{{ t('登录后才能评论') }}{{ t('，') }}<a href="{{ url_for('auth.login', next=request.path) }}">{{ t('去登录') }}</a></p>
+      {% endif %}
+    </div>
+
+    <div class="comment-list" data-comment-list>
+      <p class="comment-empty">{{ t('还没有评论，来写第一条。') }}</p>
+    </div>
+  </div>
+</section>
+
+{% if related %}
+<section class="section pt-0">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">MORE LIKE THIS</p>
+      <h2 class="section-title">{{ t('同类目的地') }}</h2>
+    </div>
+    <div class="attr-grid">
+      {% for a in related %}
+      {% set related_name = attr_field(a, 'name') %}
+      <a class="attr-card" href="{{ url_for('public.attraction_detail', slug=a.slug) }}">
+        <div class="attr-media">
+          <img src="{{ a.card_image }}" alt="{{ related_name }}" loading="lazy">
+          <span class="attr-tag">{{ category_label(a.category) }}</span>
+        </div>
+        <div class="attr-body">
+          <h3>{{ related_name }}</h3>
+          <p class="attr-meta">{{ city_label(a.city) }} · {{ price_text(a) }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<script src="{{ url_for('static', filename='vendor/echarts.min.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/detail_extras.js') }}" defer></script>
+{% endblock %}

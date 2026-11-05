@@ -1,0 +1,44 @@
+<div class="ai-widget" data-ai-widget>
+  <button class="ai-btn" type="button" data-ai-open aria-label="{{ t('打开 AI 旅行助手') }}">
+    <span class="ai-dot"></span>
+    <span class="ai-label">AI</span>
+  </button>
+
+  <section class="ai-panel" data-ai-panel hidden aria-label="{{ t('AI 旅行助手') }}">
+    <header class="ai-header">
+      <div>
+        <p class="ai-title">{{ t('AI 旅行助手') }}</p>
+        <p class="ai-sub">{{ t('贵州 18 个目的地，问我怎么玩') }}</p>
+      </div>
+      <div class="ai-head-actions">
+        <button class="ai-help" type="button" data-ai-help aria-label="{{ t('使用提示') }}" title="{{ t('使用提示') }}">?</button>
+        <button class="ai-close" type="button" data-ai-close aria-label="{{ t('关闭') }}">×</button>
+      </div>
+    </header>
+    <div class="ai-messages" data-ai-messages aria-live="polite">
+      <div class="ai-msg ai-msg-bot">{{ t('你好，我是贵州文旅 AI 助手。我能帮你排完整行程、查门票和开放时间、看天气、算预算、检查行程冲突，也能直接带你去评分最高的景点。面板四边可以拖动放大；把小球拖到景点卡片上，能直接问这个景点。直接把想法说出来就行。') }}</div>
+    </div>
+    <p class="ai-suggest-label">{{ t('试试这些：') }}</p>
+    <div class="ai-suggestions" data-ai-suggestions>
+      <button type="button" data-ai-suggest="帮我排一份 3 天行程">{{ t('帮我排一份 3 天行程') }}</button>
+      <button type="button" data-ai-suggest="黄果树门票多少钱">{{ t('黄果树门票多少钱') }}</button>
+      <button type="button" data-ai-suggest="明天下雨还能玩吗">{{ t('明天下雨还能玩吗') }}</button>
+      <button type="button" data-ai-suggest="带娃去梵净山累不累">{{ t('带娃去梵净山累不累') }}</button>
+    </div>
+    <form class="ai-input" data-ai-form>
+      <input type="text" name="message" placeholder="{{ t('问行程、门票、天气都行，比如：帮我排 3 天行程') }}" autocomplete="off" maxlength="500" data-ai-input>
+      <button type="submit" aria-label="{{ t('发送') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"></path><path d="M6 11l6-6 6 6"></path></svg></button>
+    </form>
+    <span class="ai-resize" data-ai-resize role="separator" aria-label="{{ t('拖动调整大小') }}" title="{{ t('拖动调整大小，双击还原') }}"></span>
+  </section>
+
+  <div class="ai-guide" data-ai-guide hidden>
+    <p class="ai-guide-title">{{ t('我可以帮你') }}</p>
+    <p class="ai-guide-text">{{ t('排完整行程、查门票开放时间、看天气、比预算，都能直接问。拖动面板四边可放大；把右下角小球拖到景点卡片上，可以直接问这个景点。') }}</p>
+    <div class="ai-guide-actions">
+      <button class="ai-guide-ok" type="button" data-ai-guide-ok>{{ t('知道了') }}</button>
+      <button class="ai-guide-later" type="button" data-ai-guide-try>{{ t('先试一句') }}</button>
+      <button class="ai-guide-snooze" type="button" data-ai-guide-snooze title="{{ t('今天不再提示') }}">{{ t('今天不再提示') }}</button>
+    </div>
+  </div>
+</div>

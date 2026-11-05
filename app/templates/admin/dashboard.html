@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ t('仪表盘') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}admin-dashboard{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">DASHBOARD</p>
+    <h1 class="page-title">{{ t('后台管理') }}</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container">
+    {% include 'components/admin_nav.html' %}
+    <div class="stat-grid">
+      <a class="stat-card" href="/admin/attractions"><strong>{{ counts.attractions }}</strong><span>{{ t('景点') }}</span></a>
+      <a class="stat-card" href="/admin/comments"><strong>{{ counts.pending_comments }}</strong><span>{{ t('待审评论') }}</span></a>
+      <a class="stat-card" href="/admin/orders"><strong>{{ counts.orders }}</strong><span>{{ t('订单') }}</span></a>
+      <div class="stat-card"><strong>{{ counts.users }}</strong><span>{{ t('用户') }}</span></div>
+    </div>
+    <div class="admin-quick">
+      <a class="btn btn-primary" href="/admin/attractions/new">{{ t('新增景点') }}</a>
+      <a class="btn btn-outline" href="/admin/comments">{{ t('去审核评论') }}</a>
+      <a class="btn btn-outline" href="/admin/orders">{{ t('查看订单') }}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

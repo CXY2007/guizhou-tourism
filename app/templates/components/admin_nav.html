@@ -1,0 +1,9 @@
+{% set _p = request.path %}
+<nav class="admin-tabs" aria-label="{{ t('后台导航') }}">
+  <a href="/admin" class="admin-tab{% if _p == '/admin' or _p == '/admin/' %} is-active{% endif %}">{{ t('仪表盘') }}</a>
+  <a href="/admin/attractions" class="admin-tab{% if _p.startswith('/admin/attractions') %} is-active{% endif %}">{{ t('景点管理') }}</a>
+  <a href="/admin/comments" class="admin-tab{% if _p.startswith('/admin/comments') %} is-active{% endif %}">{{ t('评论审核') }}</a>
+  <a href="/admin/orders" class="admin-tab{% if _p.startswith('/admin/orders') %} is-active{% endif %}">{{ t('订单') }}</a>
+  <a href="/admin/users" class="admin-tab{% if _p.startswith('/admin/users') %} is-active{% endif %}">{{ t('用户') }}</a>
+  <a href="/admin/traffic" class="admin-tab{% if _p.startswith('/admin/traffic') %} is-active{% endif %}">{{ t('浏览流量') }}</a>
+</nav>

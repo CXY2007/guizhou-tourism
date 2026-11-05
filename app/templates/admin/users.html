@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ t('用户管理') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}admin-users{% endblock %}
+
+{% block content %}
+{% set role_labels = {"admin": t('管理员'), "user": t('普通用户')} %}
+{% set status_labels = {"active": t('正常'), "disabled": t('禁用')} %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">USERS</p>
+    <h1 class="page-title">{{ t('用户管理') }}</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container">
+    {% include 'components/admin_nav.html' %}
+    <div class="admin-toolbar">
+      <form class="admin-search" method="get" action="/admin/users">
+        <input class="input" type="search" name="q" value="{{ q or '' }}" placeholder="{{ t('搜索显示名 / 登录名 / UID') }}">
+        <select class="input" name="status">
+          <option value="" {% if not status %}selected{% endif %}>{{ t('全部') }}</option>
+          <option value="active" {% if status == 'active' %}selected{% endif %}>{{ t('正常') }}</option>
+          <option value="disabled" {% if status == 'disabled' %}selected{% endif %}>{{ t('禁用') }}</option>
+        </select>
+        <select class="input" name="role">
+          <option value="" {% if not role %}selected{% endif %}>{{ t('全部') }}</option>
+          <option value="admin" {% if role == 'admin' %}selected{% endif %}>{{ t('管理员') }}</option>
+          <option value="user" {% if role == 'user' %}selected{% endif %}>{{ t('普通用户') }}</option>
+        </select>
+        <button class="btn btn-outline btn-sm" type="submit">{{ t('筛选') }}</button>
+      </form>
+      <span class="admin-count">{{ t('共 {n} 个', n=total) }}</span>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table" data-admin-users>
+        <thead><tr><th>UID</th><th>{{ t('显示名') }}</th><th>{{ t('登录名') }}</th><th>{{ t('角色') }}</th><th>{{ t('状态') }}</th><th>{{ t('注册时间') }}</th><th>{{ t('操作') }}</th></tr></thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td><code class="uid-chip">#{{ u.id }}</code></td>
+            <td>{{ u.display_name }}</td>
+            <td>{% if u.nickname and u.nickname != u.username %}<span class="muted-inline">{{ u.username }}</span>{% else %}<span class="muted-inline">{{ t('与显示名相同') }}</span>{% endif %}</td>
+            <td>{{ role_labels.get(u.role, u.role) }}</td>
+            <td><span class="status-badge status-{{ u.status }}">{{ status_labels.get(u.status, u.status) }}</span></td>
+            <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
+            <td>
+              {% if u.id == current_user.id %}
+              <span class="admin-count">{{ t('当前账号') }}</span>
+              {% else %}
+              {% set disabling = u.status == 'active' %}
+              <form method="post" action="{{ url_for('admin.user_status', user_id=u.id) }}" class="inline-form" data-confirm="{{ t('确定禁用该用户？') if disabling else t('确定启用该用户？') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status" value="{{ 'disabled' if disabling else 'active' }}">
+                <input type="hidden" name="back_q" value="{{ q or '' }}">
+                <input type="hidden" name="back_status" value="{{ status or '' }}">
+                <input type="hidden" name="back_role" value="{{ role or '' }}">
+                <input type="hidden" name="back_page" value="{{ page }}">
+                <button class="btn btn-outline btn-sm{% if disabling %} text-cinnabar{% endif %}" type="submit">{{ t('禁用') if disabling else t('启用') }}</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="pane-empty">{{ t('没有匹配的用户') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pages > 1 %}
+    <nav class="pager" aria-label="{{ t('分页') }}">
+      {% if page > 1 %}<a href="{{ url_for('admin.users', q=q or None, status=status or None, role=role or None, page=page-1) }}">{{ t('上一页') }}</a>{% endif %}
+      <span>{{ page }} / {{ pages }}</span>
+      {% if page < pages %}<a href="{{ url_for('admin.users', q=q or None, status=status or None, role=role or None, page=page+1) }}">{{ t('下一页') }}</a>{% endif %}
+    </nav>
+    {% endif %}
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/admin_users.js') }}" defer></script>
+{% endblock %}

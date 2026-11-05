@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ t('编辑景点') if attraction else t('新增景点') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}admin-attraction-form{% endblock %}
+
+{% block content %}
+{% set a = attraction %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">ATTRACTION</p>
+    <h1 class="page-title">{{ t('编辑景点') if a else t('新增景点') }}</h1>
+  </div>
+</section>
+<section class="section pt-0">
+  <div class="container">
+    {% include 'components/admin_nav.html' %}
+    <form class="admin-form" method="post" action="{{ request.path }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {# 校验失败时优先用用户刚填的值（values），否则用库里的记录（a），新建时都为空 #}
+      {% set src = values if values is defined else (a if a else none) %}
+
+      <label class="field"><span>Slug</span><input class="input" name="slug" required placeholder="xifeng-camp" value="{{ src.slug if src else '' }}"><span class="admin-hint">{{ t('小写字母、数字和连字符（例：xifeng-camp）；会作为网址 /attractions/ 后面的路径，发布后不建议再改') }}</span></label>
+      <label class="field"><span>{{ t('名称') }}</span><input class="input" name="name" required value="{{ src.name if src else '' }}"></label>
+      <label class="field"><span>{{ t('分类') }}</span>
+        <select class="input" name="category">
+          {% for c in ['自然','人文','红色','科技','季节'] %}
+          <option value="{{ c }}" {% if src and src.category == c %}selected{% endif %}>{{ t(c) }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field"><span>{{ t('状态') }}</span>
+        <select class="input" name="status">
+          <option value="draft" {% if src and src.status == 'draft' %}selected{% endif %}>{{ t('草稿') }}</option>
+          <option value="published" {% if not src or src.status == 'published' %}selected{% endif %}>{{ t('已发布') }}</option>
+        </select>
+      </label>
+      <label class="field"><span>{{ t('城市') }}</span><input class="input" name="city" value="{{ (src.city or '') if src else '' }}"></label>
+      <label class="field"><span>{{ t('区域') }}</span><input class="input" name="region" value="{{ (src.region or '') if src else '' }}"></label>
+      <label class="field"><span>{{ t('票价（元，0 为免费）') }}</span><input class="input" type="number" step="0.01" min="0" name="price" value="{{ src.price if src and src.price is not none else 0 }}"></label>
+      <label class="field"><span>{{ t('开放时间') }}</span><input class="input" name="open_time" value="{{ (src.open_time or '') if src else '' }}"></label>
+      <label class="field"><span>{{ t('门票说明') }}</span><input class="input" name="ticket_note" value="{{ (src.ticket_note or '') if src else '' }}"></label>
+      <label class="field"><span>{{ t('建议游玩时长（分钟）') }}</span><input class="input" type="number" min="0" name="visit_duration" value="{{ src.visit_duration if src and src.visit_duration is not none else '' }}"></label>
+      <label class="field"><span>{{ t('最佳月份') }}</span><input class="input" name="best_months" value="{{ (src.best_months or '') if src else '' }}"></label>
+      {# 「当季景点」只在编辑已有景点时出现：新建时不显示，避免和一个实际不影响展示的开关混淆 #}
+      {% if a %}
+      <label class="field admin-check"><input type="checkbox" name="seasonal" value="1" {% if a.seasonal %}checked{% endif %}> <span>{{ t('当季景点') }}</span></label>
+      {% endif %}
+      <label class="field"><span>{{ t('地址') }}</span><input class="input" name="address" value="{{ (src.address or '') if src else '' }}"></label>
+      <label class="field"><span>{{ t('经度') }}</span><input class="input" name="lng" placeholder="106.7134" value="{{ src.longitude if src and src.longitude is not none else '' }}"><span class="admin-hint">{{ t('必填，例：106.7134（可在地图工具里右键取点）') }}</span></label>
+      <label class="field"><span>{{ t('纬度') }}</span><input class="input" name="lat" placeholder="26.5783" value="{{ src.latitude if src and src.latitude is not none else '' }}"><span class="admin-hint">{{ t('必填，例：26.5783') }}</span></label>
+      <label class="field"><span>{{ t('封面图 URL') }}</span><input class="input" name="cover_image" value="{{ (src.cover_image or '') if src else '' }}"></label>
+      <label class="field"><span>{{ t('上传封面') }}</span><input class="input" type="file" name="cover_file" accept=".jpg,.jpeg,.png,.webp"></label>
+      <label class="field admin-wide"><span>{{ t('上传图集（可多选）') }}</span><input class="input" type="file" name="images" multiple accept=".jpg,.jpeg,.png,.webp"></label>
+      <p class="admin-hint admin-wide">{{ t('支持 jpg/png/webp，单张 ≤5MB；封面会作为卡片首图。') }}</p>
+      {% if a and a.images %}
+      <div class="admin-gallery admin-wide">
+        <p class="admin-hint">{{ t('当前图集') }}</p>
+        {% for img in a.images %}
+        <div class="admin-gallery-item">
+          <img src="{{ img.image_url }}" alt="{{ a.name }} {{ loop.index }}">
+          <form method="post" action="/admin/attractions/{{ a.id }}/images/{{ img.id }}/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="link-danger" type="submit">{{ t('删除图片') }}</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <label class="field admin-wide"><span>{{ t('标签（逗号分隔）') }}</span><input class="input" name="tags" value="{{ (src.tags or [])|join(',') if src else '' }}"></label>
+      <label class="field admin-wide"><span>{{ t('简介') }}</span><textarea class="input" rows="2" name="summary">{{ (src.summary or '') if src else '' }}</textarea></label>
+      <label class="field admin-wide"><span>{{ t('详细介绍') }}</span><textarea class="input" rows="6" name="description">{{ (src.description or '') if src else '' }}</textarea></label>
+      <label class="field admin-wide"><span>{{ t('交通') }}</span><textarea class="input" rows="3" name="transport">{{ (src.transport or '') if src else '' }}</textarea></label>
+      <label class="field admin-wide"><span>{{ t('游玩提示') }}</span><textarea class="input" rows="3" name="tips">{{ (src.tips or '') if src else '' }}</textarea></label>
+
+      <div class="admin-wide admin-actions">
+        <button class="btn btn-primary" type="submit">{{ t('保存') }}</button>
+        <a class="btn btn-outline" href="/admin/attractions">{{ t('取消') }}</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

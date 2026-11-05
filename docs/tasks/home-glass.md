@@ -1,0 +1,87 @@
+# 首页玻璃拟态改版 · 任务契约（P0 冻结）
+
+> 范围：**只改首页**（`app/templates/pages/home.html` 及其样式/脚本）。详情页与其它页面不动。
+> 已拍板：首屏保留 18/9/5 统计；精选目的地 8 张 + 「查看全部 18 个」；分类卡用**明显卡片堆**。
+
+## 1. 屏级结构
+
+| 屏 | 内容 |
+|---|---|
+| 第 1 屏（100svh） | 导航 + 全屏英雄图轮播 + eyebrow/标题/副标题 + 两个 CTA + 统计 18/9/5 + 下滑提示。**无缩略图条、无任何卡片** |
+| 第 2 屏（整屏起） | 「五种贵州」5 张玻璃卡（CSS 3D 卡片堆）+ 今日推荐玻璃卡 |
+| 第 3 屏起 | 精选目的地 8 张（假玻璃网格）+「查看全部 18 个」；当季花海；AI 区；关于；页脚 |
+
+背景：`app/static/images/hero/bg_soft.jpg`（梵净山蓝天云海，1600×900，预先模糊 12px，40KB）+ 纸色遮罩 `rgba(244,239,230,.60)` + 4% 颗粒，固定不滚动。
+
+硬约束：
+- 首屏 `min-height: 100svh`（`100vh` 兜底），第二屏必须**滚满一屏**才出现，不做“露一角”。
+- 首屏若有多余元素（缩略图、caption、卡片）一律移除。
+- **轮播只用实景照片**：品牌海报自带文字，叠 UI 会压字，不进轮播（文件保留，可作独立物料）。
+
+## 2. 玻璃 token（三档）
+
+| 档 | 用途 | 背景 | 模糊 | 说明 |
+|---|---|---|---|---|
+| `.glass` | 首屏浮层 / AI 区 / 页脚 | 白色高光 12%→0 + `rgba(20,42,36,.55)`→`rgba(14,42,36,.32)` | `blur(20px) saturate(160%)` | 真磨砂 |
+| `.glass-soft` | 导航 / 小标签 | 白 10% + `rgba(20,42,36,.40)` | `blur(12px) saturate(150%)` | 轻磨砂 |
+| `.glass-fake` | 长网格（8 张卡） | 半透明面板 + **静态模糊底图** | 无 `backdrop-filter` | 防掉帧 |
+
+共同：`1px solid rgba(255,255,255,.16)`、`inset 0 1px 0 rgba(255,255,255,.16)`、三档外阴影、`@supports` 降级实色。
+
+## 3. 3D / 光效 / 颗粒
+
+- **分类卡堆（明显）**：容器 `perspective: 1200px`；5 张卡 `rotateY(-8°~+8°)` 扇形叠放、`translateZ` 分层；hover 抬起 `translateZ(24px) rotateY(0)`。
+- **景点卡**：hover 倾斜 `rotateX(2°) rotateY(-3°) translateZ(8px)`，仅桌面。
+- **光效**：玻璃斜向高光 12%→0；卡片角落径向光晕（金/石青 8–12%）。
+- **颗粒**：SVG `feTurbulence` 4–6%，`mix-blend-mode: overlay`，页面级 + 面板级。
+- **触屏 / reduced-motion**：无 hover 3D，改滚动淡入；`prefers-reduced-motion` 全部静止。
+
+## 4. 性能预算
+
+- 真 `backdrop-filter` 元素 ≤ **5 个/视口**，`blur ≤ 24px`
+- 长网格一律 `.glass-fake`，不实时模糊
+- CSS 增量 ≤ **10KB gzip**；首页 LCP 劣化 ≤ 10%
+- 中途安卓机滚动不抖（DevTools FPS / 长任务抽检）
+
+## 5. 验收标准
+
+1. 1440 / 375 首屏无卡片、无缩略图条
+2. 向下滚整一屏才出现玻璃卡片，无“露一角”
+3. 分类卡堆在桌面可见，hover 抬起；触屏为静态堆叠
+4. 3D 在 `prefers-reduced-motion` 下全部关闭
+5. 磨砂区对比度 ≥ 5:1，纸面区 ≥ 4.5:1
+6. `pytest tests -q` 全过（本次不动后端，仅作回归门禁）
+7. 截图归档：`docs/shots/home-glass/`
+
+## 6. 写作用域与分工
+
+| 角色 | 改什么 | 不改什么 |
+|---|---|---|
+| Claude Code | `app/templates/pages/home.html`、`app/static/js/app.js`、`app/static/css/src/input.css`、构建 `app.css` | 不动 `.py`、不动其它模板 |
+| DSH | `docs/tasks/home-glass.md`、`docs/shots/home-glass/`、集成修错、README | 不独立重写首页 |
+| Opus / GPT | 只读评审 | 不改文件 |
+| Codex | 不参与 | — |
+
+## 7. 阶段与时间
+
+| 阶段 | 内容 | 负责 | 工时 |
+|---|---|---|---|
+| P0 | 契约冻结（本文档） | DSH | 4h |
+| P1 | 英雄重构（100svh、去缩略图、下滑提示、JS 适配） | Claude | 6h |
+| P2 | 玻璃系统（三档 + 阴影 + 颗粒 + 降级） | Claude | 8h |
+| P3 | 第二屏卡片（5 张 3D 卡堆 + 今日推荐） | Claude | 6h |
+| P4 | 其余区块（8 张精选、当季、AI、关于、页脚） | Claude | 8h |
+| P5 | 光效/3D 收尾 + 移动端替代 | Claude | 6h |
+| P6 | 集成、调色、对比度、性能、截图 | DSH | 8h |
+| P7 | Opus 评审 + GPT 复核 + 修 findings | Opus/GPT/DSH | 9h |
+| P8 | 最终验收、文档、提交 | DSH | 3h |
+
+合计 ≈ 58h ≈ 7 人天；日历约 5 天。P1 完成、P3 完成、P6 完成是三处可停点。
+
+## 8. 风险
+
+1. iOS 固定背景 + 磨砂滚动掉帧 → 长区块用假玻璃
+2. `backdrop-filter` 嵌套导致层叠上下文错乱 → 禁止玻璃套玻璃
+3. Tailwind 清理未命中的新类 → 构建后抽查 `app.css`
+4. 去缩略图影响轮播 JS → P1 后回归首页轮播/自动切换
+5. 截图基线变化 → 归档 before/after 对照

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ t('评论审核') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}admin-comments{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">MODERATION</p>
+    <h1 class="page-title">{{ t('评论审核') }}</h1>
+    <p class="page-sub">{{ t('先审后发：通过后才会在景点页展示。') }}</p>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container">
+    <div class="admin-toolbar">
+      <div class="filter-row" data-admin-filters>
+        <button class="filter-pill is-active" type="button" data-status="pending">{{ t('待审核') }}</button>
+        <button class="filter-pill" type="button" data-status="approved">{{ t('已通过') }}</button>
+        <button class="filter-pill" type="button" data-status="rejected">{{ t('已拒绝') }}</button>
+      </div>
+      <span class="admin-count" data-admin-count></span>
+    </div>
+    <div class="admin-list" data-admin-list>
+      <p class="pane-empty">{{ t('加载中…') }}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

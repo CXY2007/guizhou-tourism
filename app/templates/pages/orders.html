@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ t('我的订单') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_page %}orders{% endblock %}
+
+{% block content %}
+{% set status_labels = {"pending": t('待支付'), "paid": t('已支付'), "cancelled": t('已取消')} %}
+<section class="page-head">
+  <div class="container">
+    <p class="eyebrow">MY ORDERS</p>
+    <h1 class="page-title">{{ t('我的订单') }}</h1>
+  </div>
+</section>
+
+<section class="section pt-0">
+  <div class="container" data-orders>
+    {% if orders %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>{{ t('景点') }}</th><th>{{ t('日期') }}</th><th>{{ t('人数') }}</th><th>{{ t('金额') }}</th><th>{{ t('状态') }}</th><th></th></tr></thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td><a class="text-teal" href="/attractions/{{ o.attraction.slug }}">{{ o.attraction.name }}</a></td>
+            <td>{{ o.visit_date }}</td>
+            <td>{{ o.quantity }}</td>
+            <td>{% if o.total %}¥{{ o.total }}{% else %}{{ t('免费') }}{% endif %}</td>
+            <td><span class="status-badge status-{{ o.status }}">{{ status_labels.get(o.status, o.status) }}</span></td>
+            <td>
+              {% if o.status == 'pending' %}
+              <button class="btn btn-primary btn-sm" type="button" data-pay="{{ o.id }}">{{ t('模拟支付') }}</button>
+              <button class="btn btn-outline btn-sm" type="button" data-cancel="{{ o.id }}">{{ t('取消订单') }}</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="itin-msg" data-msg role="status"></p>
+    {% else %}
+    <div class="empty-state">
+      <p class="empty-title">{{ t('还没有订单') }}</p>
+      <p class="empty-desc">{{ t('去挑选一处想去的景点吧。') }}</p>
+      <a class="btn btn-primary" href="{{ url_for('public.attractions') }}">{{ t('浏览景点') }}</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+<script src="{{ url_for('static', filename='js/orders.js') }}" defer></script>
+{% endblock %}

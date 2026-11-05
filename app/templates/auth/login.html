@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ t('登录') }} · {{ t('贵州文旅') }}{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-visual" aria-hidden="true">
+    <div class="auth-visual-text">
+      <p class="eyebrow light">WELCOME BACK</p>
+      <p class="auth-quote">{{ t('“山地公园省，<br>多彩贵州风。”')|safe }}</p>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <p class="eyebrow">SIGN IN</p>
+      <h1 class="auth-title">{{ t('登录') }}</h1>
+      <p class="auth-sub">{{ t('收藏、评论、排行程，从登录开始。') }}</p>
+
+      <form method="post" class="auth-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="field">
+          <span>{{ t('登录名') }}</span>
+          <input class="input" type="text" name="username" required autocomplete="username" placeholder="{{ t('你的登录名') }}">
+        </label>
+        <label class="field">
+          <span>{{ t('密码') }}</span>
+          <input class="input" type="password" name="password" required autocomplete="current-password" placeholder="{{ t('你的密码') }}">
+        </label>
+        <button class="btn btn-primary auth-submit" type="submit">{{ t('登录') }}</button>
+      </form>
+
+      <p class="auth-switch">{{ t('还没有账号？') }}<a href="{{ url_for('auth.register') }}">{{ t('立即注册') }}</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

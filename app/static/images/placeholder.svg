@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="图片待补">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1F4E5A"/>
+      <stop offset="1" stop-color="#0E2A24"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#g)"/>
+  <text x="600" y="470" fill="#F4EFE6" font-size="58" text-anchor="middle" font-family="'Noto Serif SC','Songti SC',serif">图片待补</text>
+  <text x="600" y="540" fill="#8FA6A0" font-size="24" text-anchor="middle" letter-spacing="8">IMAGE PENDING</text>
+</svg>

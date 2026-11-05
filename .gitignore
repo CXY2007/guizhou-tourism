@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 环境变量（真实密钥不入库；模板 .env.example 保留）
+.env
+.env.*
+!.env.example
+
+# 本机自动生成的会话签名钥匙（每台机器不同，绝不入库）
+instance/.secret_key
+instance/.admin_password
+
+# Node
+node_modules/
+
+# 日志 / 系统临时
+*.log
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+
+logs/
+docs/reviews/*.tmp
+
+# 素材原图（体积大，只提交处理后的 static 图）
+新十大风景图/
+
+# 注意：instance/guizhou.db 与 app/static/uploads/ 随仓库提交，
+# 这样 clone 下来直接有演示数据与评论配图（本版特意不做忽略）。
+
+# 本机自动生成 / 会话钥匙 / 演示口令（绝不入库）
+instance/.secret_key
+instance/.admin_password
+instance/.demo_accounts.txt
+
+# 用户上传的评论配图是运行时数据，绝不入库
+app/static/uploads/comments/
