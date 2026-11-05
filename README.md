@@ -206,8 +206,8 @@ wsgi.py              waitress 生产入口
 - 进入「探索景点」有 2 秒全屏海报开场，切分类不重复播放
 - 登录 / 注册页：整页海报原图 + 全透明卡片 + 深墨字白柔光
 
-### Agent 协作流水线
-- Playbook：[docs/agent-playbook.md](docs/agent-playbook.md)
+### 协作流程 协作流水线
+- Playbook：[docs/协作流程-playbook.md](docs/协作流程-playbook.md)
 - 该流水线的本机脚本（施工看门狗 / 交叉复核 / 截图与联调探针）依赖开发者自己的路径与 key，
   **不属于交付内容，未随仓库发布**；复现流程见 Playbook 的说明。
 

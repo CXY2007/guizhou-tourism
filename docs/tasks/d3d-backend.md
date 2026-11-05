@@ -1,4 +1,4 @@
-# 任务包：D3-D 后端（Codex）
+# 任务包：D3-D 后端（后端开发）
 
 ## 边界
 - 只改 Python：`app/blueprints/api.py`（追加）、`app/blueprints/admin.py`（扩展）、`app/blueprints/user.py`（追加页面路由）、`app/services/itinerary.py`（新建）、`tests/test_d3d.py`（新建）。

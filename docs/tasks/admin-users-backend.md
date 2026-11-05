@@ -4,7 +4,7 @@
 - Allowed: `app/blueprints/admin.py` (append routes/helper), `tests/test_admin_users.py` (new).
 - Forbidden: `app/templates/**`, `app/static/**`, `app/models.py`, `app/config.py`, other blueprints, `app/i18n.py`.
 - Do not run `git commit`.
-- The frontend template `admin/users.html` is owned by another agent and may not exist while you run pytest. Do NOT create it. Do NOT test `GET /admin/users` rendering; test POST/DB behavior only.
+- The frontend template `admin/users.html` is owned by another 协作流程 and may not exist while you run pytest. Do NOT create it. Do NOT test `GET /admin/users` rendering; test POST/DB behavior only.
 
 ## Contract
 

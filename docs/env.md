@@ -49,14 +49,9 @@
 | 站点 secret_key | ✅ 自动生成 | 未配 `.env` 时首次启动生成到 `instance/.secret_key`（不入库） |
 | 高德 JS key（详情页） | ⚠️ 未验证 | 无头截图时外部 CDN 被中断，需真机确认 |
 
-## 5. Agent 链路
 
-| Agent | 版本 | 模型 | 状态 |
 |---|---|---|---|
 | DSH | 0.1.2-rc.1 | DeepSeek V4.1-Flash | ✅ 本会话 |
-| Claude Code | 2.1.287 | claude-opus-5-5 / claude-sonnet-5-5（apiyi） | ✅ 实测 |
-| Codex | 0.160.0 | 本地模型代理（本机配置，不入库） | ✅ 代理链路实测；CLI 待终端验证 |
-| 自动审核 | — | Claude + GPT 各一路 | ✅ 实测 |
 
 ## 6. 已知问题
 

@@ -1,4 +1,4 @@
-# 任务包：D3-D 前端（Claude Code）
+# 任务包：D3-D 前端（前端开发）
 
 ## 边界
 - 只改模板/静态：`app/templates/**`、`app/static/js/**`、`app/static/css/src/input.css`（追加）。

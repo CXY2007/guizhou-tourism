@@ -1,10 +1,10 @@
-# Task: admin user management — frontend (Claude Code)
+# Task: admin user management — frontend (前端开发)
 
 ## Boundaries
 - Allowed: `app/templates/admin/users.html` (new), `app/templates/components/admin_nav.html`, `app/static/js/admin_users.js` (new), `app/static/css/src/input.css` (append only).
 - Forbidden: any Python, `app/models.py`, `app/config.py`, `app/i18n.py`, other templates/JS.
 - Do not run `git commit`. Do not restart the server on 8900 (old code).
-- The backend route is being written by another agent in parallel; code against the contract below.
+- The backend route is being written by another 协作流程 in parallel; code against the contract below.
 
 ## Contract
 `GET /admin/users` context:

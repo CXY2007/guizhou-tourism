@@ -57,23 +57,23 @@
 
 | 角色 | 改什么 | 不改什么 |
 |---|---|---|
-| Claude Code | `app/templates/pages/home.html`、`app/static/js/app.js`、`app/static/css/src/input.css`、构建 `app.css` | 不动 `.py`、不动其它模板 |
+| 前端开发 | `app/templates/pages/home.html`、`app/static/js/app.js`、`app/static/css/src/input.css`、构建 `app.css` | 不动 `.py`、不动其它模板 |
 | DSH | `docs/tasks/home-glass.md`、`docs/shots/home-glass/`、集成修错、README | 不独立重写首页 |
-| Opus / GPT | 只读评审 | 不改文件 |
-| Codex | 不参与 | — |
+| 评审 / 交叉复核 | 只读评审 | 不改文件 |
+| 后端开发 | 不参与 | — |
 
 ## 7. 阶段与时间
 
 | 阶段 | 内容 | 负责 | 工时 |
 |---|---|---|---|
 | P0 | 契约冻结（本文档） | DSH | 4h |
-| P1 | 英雄重构（100svh、去缩略图、下滑提示、JS 适配） | Claude | 6h |
-| P2 | 玻璃系统（三档 + 阴影 + 颗粒 + 降级） | Claude | 8h |
-| P3 | 第二屏卡片（5 张 3D 卡堆 + 今日推荐） | Claude | 6h |
-| P4 | 其余区块（8 张精选、当季、AI、关于、页脚） | Claude | 8h |
-| P5 | 光效/3D 收尾 + 移动端替代 | Claude | 6h |
+| P1 | 英雄重构（100svh、去缩略图、下滑提示、JS 适配） | 评审 | 6h |
+| P2 | 玻璃系统（三档 + 阴影 + 颗粒 + 降级） | 评审 | 8h |
+| P3 | 第二屏卡片（5 张 3D 卡堆 + 今日推荐） | 评审 | 6h |
+| P4 | 其余区块（8 张精选、当季、AI、关于、页脚） | 评审 | 8h |
+| P5 | 光效/3D 收尾 + 移动端替代 | 评审 | 6h |
 | P6 | 集成、调色、对比度、性能、截图 | DSH | 8h |
-| P7 | Opus 评审 + GPT 复核 + 修 findings | Opus/GPT/DSH | 9h |
+| P7 | 评审 评审 + 交叉复核 复核 + 修 findings | 评审/交叉复核/DSH | 9h |
 | P8 | 最终验收、文档、提交 | DSH | 3h |
 
 合计 ≈ 58h ≈ 7 人天；日历约 5 天。P1 完成、P3 完成、P6 完成是三处可停点。
